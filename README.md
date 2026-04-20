@@ -20,16 +20,20 @@
 - [`ugl_backtest/`](./ugl_backtest/)
   - `UGL` を `GLD` proxy で `2005-12-20` まで延長する workspace
   - overlap calibration と canonical stitched export を含みます
+- [`robust_rsi_optimization/`](./robust_rsi_optimization/)
+  - `UVIX` high-RSI leg の `entry/exit` を OOS fold と plateau smoothing で頑健化する workspace
+  - annual validation folds, robust score, holdout comparison, figure outputs を含みます
 - [`docs/letf_backtest_methodology.md`](./docs/letf_backtest_methodology.md)
   - testfol, GitHub research, official methodology, 現状ベストプラクティスをまとめたノート
 
 ## Current Focus
 
 - canonical dataset: `stitched_uvix_longvol_2x`
-- backtest window: `2011-01-03 .. 2026-04-17`
+- backtest window: `2005-12-20 .. 2026-04-17`
 - signal source: `^GSPC`
-- best high-RSI thresholds: `entry = 69.4`, `exit = 66.5`
-- leave-one-episode-out robustness: `62 / 79` episodes で最適解不変
+- naive full-sample optimum: `entry = 69.4`, `exit = 65.4`
+- robust OOS optimum: `entry = 67.9`, `exit = 65.5`
+- robust validation split: `2006-01-03 .. 2022-12-30`, final holdout: `2023-01-03 .. 2026-04-17`
 
 `TQQQ` workspace の current canonical result:
 
@@ -67,4 +71,4 @@
 
 この状態で、`uvix_backtest/rsi_entry_exit_optimize.py` は sibling workspaces の stitched `TQQQ/SOXL/TMF/UGL` series を既定で読むので、`stitched_uvix_longvol_2x` を `2005-12-20 .. latest` で最適化できます。
 
-詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md), [`tmf_backtest/README.md`](./tmf_backtest/README.md), [`ugl_backtest/README.md`](./ugl_backtest/README.md) を参照してください。
+詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md), [`tmf_backtest/README.md`](./tmf_backtest/README.md), [`ugl_backtest/README.md`](./ugl_backtest/README.md), [`robust_rsi_optimization/README.md`](./robust_rsi_optimization/README.md) を参照してください。
