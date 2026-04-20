@@ -1,0 +1,2 @@
+requested_history_start,actual_history_start,history_end,legacy_benchmark,modern_benchmark_proxy,switch_date,letf_ticker,rate_series_id,leverage,annual_fee,canonical_model,canonical_label,calibrated_financing_multiplier,actual_inception,actual_anchor_price,canonical_start_level,canonical_end_level
+1993-01-01,1994-05-04,2026-04-17,^SOX,SOXX,2021-08-25,SOXL,DGS3MO,3.0,0.0075,hybrid_sox_to_soxx,Hybrid SOX -> SOXX,0.7849591927515576,2010-03-11,0.6008639335632324,343.03680362968214,94.68000030517646

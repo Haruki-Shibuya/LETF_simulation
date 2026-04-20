@@ -11,6 +11,9 @@
 - [`tqqq_backtest/`](./tqqq_backtest/)
   - `TQQQ` を `^NDX` から `1991` まで延長する synthetic / stitched workspace
   - calibration summary, overlap diagnostics, long-history export を含みます
+- [`soxl_backtest/`](./soxl_backtest/)
+  - `SOXL` を semiconductor benchmark proxy から長期延長する workspace
+  - `legacy SOX / modern SOXX / hybrid` を比較して canonical model を選びます
 - [`docs/letf_backtest_methodology.md`](./docs/letf_backtest_methodology.md)
   - testfol, GitHub research, official methodology, 現状ベストプラクティスをまとめたノート
 
@@ -30,4 +33,13 @@
 - calibrated financing multiplier: `0.9133907212`
 - canonical export: `tqqq_backtest/output/tqqq_extension_1991.csv`
 
-詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md) と [`tqqq_backtest/README.md`](./tqqq_backtest/README.md) を参照してください。
+`SOXL` workspace の current canonical result:
+
+- requested history start: `1993-01-01`
+- actual reproducible history start: `1994-05-04`
+- live calibration anchor: `2010-03-11`
+- canonical model: `hybrid_sox_to_soxx`
+- calibrated financing multiplier: `0.7849591928`
+- canonical export: `soxl_backtest/output/soxl_extension.csv`
+
+詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md) を参照してください。

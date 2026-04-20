@@ -236,6 +236,11 @@ repo:
 - fee history を fixed proxy に丸めることが多い
 - 実際の swap book / collateral / tax / intraday friction までは入っていない
 
+補足:
+
+- `TQQQ` のように benchmark が比較的一貫している商品は、この方法がかなり素直にハマる
+- `SOXL` のように benchmark history が分断される商品は、`legacy benchmark -> modern proxy` の **hybrid underlier** を候補に入れて live overlap で選ぶ方が実務的
+
 ### B. Volatility ETP / LETF (`UVIX`, `UVXY`, `VXX` など)
 
 現時点のベストプラクティスはこれです。
@@ -323,6 +328,8 @@ repo:
 
 - [`tqqq_backtest/README.md`](../tqqq_backtest/README.md)
 - [`tqqq_backtest/extend_tqqq_history.py`](../tqqq_backtest/extend_tqqq_history.py)
+- [`soxl_backtest/README.md`](../soxl_backtest/README.md)
+- [`soxl_backtest/extend_soxl_history.py`](../soxl_backtest/extend_soxl_history.py)
 - [`uvix_backtest/README.md`](../uvix_backtest/README.md)
 - [`uvix_backtest/rsi_entry_exit_optimize.py`](../uvix_backtest/rsi_entry_exit_optimize.py)
 
