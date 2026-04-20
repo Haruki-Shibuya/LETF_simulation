@@ -1,0 +1,2 @@
+dataset,full_sample_best_entry,full_sample_best_exit,episode_count,same_as_full_optimum_count,same_as_full_optimum_share,distinct_leave_one_out_optima,mode_best_entry,mode_best_exit,mode_count
+stitched_uvix_longvol_2x,70.1,68.9,94,92,0.9787234042553191,2,70.1,68.9,92
