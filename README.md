@@ -13,7 +13,8 @@
 
 - canonical dataset: `stitched_uvix_longvol_2x`
 - backtest window: `2011-01-03 .. 2026-04-17`
-- best high-RSI thresholds: `entry = 70.1`, `exit = 68.9`
-- leave-one-episode-out robustness: `92 / 94` episodes で最適解不変
+- signal source: `^GSPC`
+- best high-RSI thresholds: `entry = 69.4`, `exit = 66.5`
+- leave-one-episode-out robustness: `62 / 79` episodes で最適解不変
 
 詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md) を参照してください。

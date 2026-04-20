@@ -17,6 +17,9 @@ LONGVOL_HISTORY_URL = "https://cdn.cboe.com/api/global/delayed_quotes/charts/his
 TRADING_DAYS_PER_YEAR = 252
 UVIX_TARGET_LEVERAGE = 2.0
 UVIX_ANNUAL_FEE = 0.0165
+SIGNAL_TICKER = "^GSPC"
+SIGNAL_RSI_COL = "SIGNAL_RSI_14"
+SIGNAL_SMA_COL = "SIGNAL_SMA_160"
 
 
 @dataclass(frozen=True)
@@ -261,10 +264,10 @@ def hysteresis_sma(price: np.ndarray, sma: np.ndarray) -> np.ndarray:
 
 
 def build_frame(config: DatasetConfig, prices: pd.DataFrame) -> pd.DataFrame:
-    needed = ["SPY", "SOXL", "TQQQ", "UGL", "TMF", config.vol_return_col]
+    needed = [SIGNAL_TICKER, "SOXL", "TQQQ", "UGL", "TMF", config.vol_return_col]
     frame = prices[needed].copy()
-    frame["SPY_RSI_14"] = compute_rsi_wilder(prices["SPY"], 14)
-    frame["SPY_SMA_160"] = prices["SPY"].rolling(160).mean()
+    frame[SIGNAL_RSI_COL] = compute_rsi_wilder(prices[SIGNAL_TICKER], 14)
+    frame[SIGNAL_SMA_COL] = prices[SIGNAL_TICKER].rolling(160).mean()
     frame = frame.dropna().copy()
     return frame
 
@@ -293,9 +296,9 @@ def build_threshold_grid(
 
 
 def compute_strategy_stats(frame: pd.DataFrame, entry_level: float, exit_level: float, vol_return_col: str) -> dict[str, float]:
-    spy = frame["SPY"].to_numpy(dtype=float)
-    rsi = frame["SPY_RSI_14"].to_numpy(dtype=float)
-    sma = frame["SPY_SMA_160"].to_numpy(dtype=float)
+    market = frame[SIGNAL_TICKER].to_numpy(dtype=float)
+    rsi = frame[SIGNAL_RSI_COL].to_numpy(dtype=float)
+    sma = frame[SIGNAL_SMA_COL].to_numpy(dtype=float)
 
     returns = frame[["SOXL", "TQQQ", "UGL", "TMF"]].pct_change().fillna(0.0)
     ret_vol = frame[vol_return_col].to_numpy(dtype=float)
@@ -304,7 +307,7 @@ def compute_strategy_stats(frame: pd.DataFrame, entry_level: float, exit_level: 
     ret_def = (0.5 * returns["UGL"] + 0.5 * returns["TMF"]).to_numpy(dtype=float)
 
     low_state = hysteresis_lt(rsi, LOW_RSI_ENTRY, LOW_RSI_EXIT)
-    trend_state = hysteresis_sma(spy, sma)
+    trend_state = hysteresis_sma(market, sma)
 
     high_state = False
     equity = 1.0
@@ -366,9 +369,9 @@ def compute_strategy_stats(frame: pd.DataFrame, entry_level: float, exit_level: 
 
 
 def run_grid(frame: pd.DataFrame, config: DatasetConfig, entries: np.ndarray, exits: np.ndarray) -> pd.DataFrame:
-    spy = frame["SPY"].to_numpy(dtype=float)
-    rsi = frame["SPY_RSI_14"].to_numpy(dtype=float)
-    sma = frame["SPY_SMA_160"].to_numpy(dtype=float)
+    market = frame[SIGNAL_TICKER].to_numpy(dtype=float)
+    rsi = frame[SIGNAL_RSI_COL].to_numpy(dtype=float)
+    sma = frame[SIGNAL_SMA_COL].to_numpy(dtype=float)
 
     returns = frame[["SOXL", "TQQQ", "UGL", "TMF"]].pct_change().fillna(0.0)
     ret_vol = frame[config.vol_return_col].to_numpy(dtype=float)
@@ -377,7 +380,7 @@ def run_grid(frame: pd.DataFrame, config: DatasetConfig, entries: np.ndarray, ex
     ret_def = (0.5 * returns["UGL"] + 0.5 * returns["TMF"]).to_numpy(dtype=float)
 
     low_state = hysteresis_lt(rsi, LOW_RSI_ENTRY, LOW_RSI_EXIT)
-    trend_state = hysteresis_sma(spy, sma)
+    trend_state = hysteresis_sma(market, sma)
     fallback_codes = np.where(low_state, 1, np.where(trend_state, 2, 3)).astype(np.int8)
 
     count = len(entries)
@@ -521,7 +524,7 @@ def build_output_suffix(
 def main() -> None:
     args = parse_args()
     OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
-    market_tickers = sorted({"SPY", "SOXL", "TQQQ", "UGL", "TMF", "UVIX", "UVXY"})
+    market_tickers = sorted({SIGNAL_TICKER, "SOXL", "TQQQ", "UGL", "TMF", "UVIX", "UVXY"})
     prices = download_adj_close(market_tickers, start=args.fetch_start, end=args.fetch_end)
     prices, proxy_compare = enrich_with_volatility_series(prices)
     datasets = build_datasets(include_uvxy=args.include_uvxy)

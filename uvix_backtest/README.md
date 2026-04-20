@@ -10,8 +10,8 @@
 - 戦略の元ネタは testfol.io の screenshot から読み取った条件分岐です。
 - 高RSI側だけを最適化対象にし、低RSIとSMA系は固定です。
 - 固定シグナル:
-  - `SPY Low RSI`: 14-day RSI の hysteresis が `30.5 / 33.5`
-  - `SPY OVER SMA`: `Price > 160d SMA * 1.04` で entry、`Price < 160d SMA * 0.96` で exit
+  - `^GSPC Low RSI`: 14-day RSI の hysteresis が `30.5 / 33.5`
+  - `^GSPC OVER SMA`: `Price > 160d SMA * 1.04` で entry、`Price < 160d SMA * 0.96` で exit
 - 配分の骨格:
   - 高RSI時: `UVIX`
   - 低RSI時: `SOXL`
@@ -66,26 +66,26 @@
 
 最適値:
 
-- `entry = 70.1`
-- `exit = 68.9`
-- `CAGR = 107.7023%`
-- `MDD = -73.5711%`
-- `trade_count = 257`
-- `vol_days = 370`
+- `entry = 69.4`
+- `exit = 66.5`
+- `CAGR = 110.6588%`
+- `MDD = -72.9995%`
+- `trade_count = 232`
+- `vol_days = 411`
 
 補足:
 
-- `entry = 73.0` に固定した場合の最適 `exit` は `68.4 / 68.5 / 68.6 / 68.7` の同率首位でした。
+- `entry = 71.0 / exit = 68.0` の baseline は、`stitched_uvix_longvol_2x` で `CAGR = 94.4853%` です。
 
 ## Robustness Result
 
 高RSIエピソードを full-sample optimum `70.1 / 68.9` で定義し、`leave-one-episode-out` を回しました。
 
-- エピソード総数: `94`
-- `92 / 94` で最適解はそのまま `70.1 / 68.9`
-- `2 / 94` だけ `70.1 / 68.4` にシフト
+- エピソード総数: `79`
+- `62 / 79` で最適解はそのまま `69.4 / 66.5`
+- leave-one-out optimum は合計 `5` パターン
 
-つまり、単一の当たりエピソード1本に最適解が強く引っ張られている形ではありません。
+最頻値は `69.4 / 66.5` ですが、`SPY` 版よりはやや分散しており、`^GSPC` 版では最適解の頑健性は少し弱まっています。
 
 ## File Map
 

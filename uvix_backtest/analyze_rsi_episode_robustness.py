@@ -59,7 +59,7 @@ def load_full_grid(config: opt.DatasetConfig, suffix: str) -> pd.DataFrame:
 
 
 def build_prices() -> pd.DataFrame:
-    tickers = sorted({"SPY", "SOXL", "TQQQ", "UGL", "TMF", "UVIX", "UVXY"})
+    tickers = sorted({opt.SIGNAL_TICKER, "SOXL", "TQQQ", "UGL", "TMF", "UVIX", "UVXY"})
     prices = opt.download_adj_close(tickers, start=opt.DEFAULT_FETCH_START, end=None)
     prices, _ = opt.enrich_with_volatility_series(prices)
     return prices
@@ -79,7 +79,7 @@ def hysteresis_gt(values: np.ndarray, entry_level: float, exit_level: float) -> 
 
 
 def identify_episodes(frame: pd.DataFrame, entry_level: float, exit_level: float) -> tuple[pd.DataFrame, np.ndarray]:
-    high_state = hysteresis_gt(frame["SPY_RSI_14"].to_numpy(dtype=float), entry_level, exit_level)
+    high_state = hysteresis_gt(frame[opt.SIGNAL_RSI_COL].to_numpy(dtype=float), entry_level, exit_level)
     episode_ids = np.full(len(frame), -1, dtype=np.int32)
     rows: list[dict[str, object]] = []
 
@@ -121,9 +121,9 @@ def analyze_leave_one_episode_out(
     full_best_entry: float,
     full_best_exit: float,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    spy = frame["SPY"].to_numpy(dtype=float)
-    rsi = frame["SPY_RSI_14"].to_numpy(dtype=float)
-    sma = frame["SPY_SMA_160"].to_numpy(dtype=float)
+    market = frame[opt.SIGNAL_TICKER].to_numpy(dtype=float)
+    rsi = frame[opt.SIGNAL_RSI_COL].to_numpy(dtype=float)
+    sma = frame[opt.SIGNAL_SMA_COL].to_numpy(dtype=float)
 
     returns = frame[["SOXL", "TQQQ", "UGL", "TMF"]].pct_change().fillna(0.0)
     ret_vol = frame[config.vol_return_col].to_numpy(dtype=float)
@@ -132,7 +132,7 @@ def analyze_leave_one_episode_out(
     ret_def = (0.5 * returns["UGL"] + 0.5 * returns["TMF"]).to_numpy(dtype=float)
 
     low_state = opt.hysteresis_lt(rsi, opt.LOW_RSI_ENTRY, opt.LOW_RSI_EXIT)
-    trend_state = opt.hysteresis_sma(spy, sma)
+    trend_state = opt.hysteresis_sma(market, sma)
     fallback_codes = np.where(low_state, 1, np.where(trend_state, 2, 3)).astype(np.int8)
 
     strategy_count = len(entries)
@@ -357,7 +357,7 @@ def main() -> None:
     config = get_dataset_config(args.dataset)
     suffix = output_suffix(args.backtest_start, args.backtest_end, args.entry_step, args.exit_step)
     full_grid = load_full_grid(config, suffix)
-    full_best = full_grid.iloc[0]
+    full_best = full_grid.loc[full_grid["cagr"].idxmax()]
     full_best_entry = float(full_best["entry"])
     full_best_exit = float(full_best["exit"])
 
