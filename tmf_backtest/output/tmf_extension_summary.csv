@@ -1,0 +1,2 @@
+requested_history_start,actual_history_start,history_end,modern_proxy,legacy_proxy,legacy_proxy_beta,canonical_legacy_proxy_variant,letf_ticker,rate_series_id,leverage,annual_fee,calibrated_financing_multiplier,actual_inception,actual_anchor_price,canonical_start_level,canonical_end_level
+1991-01-01,1991-01-02,2026-04-17,TLT,VUSTX,1.0709125623234148,raw VUSTX,TMF,DGS3MO,3.0,0.0105,2.8684935349938314,2009-04-16,99.52271270751953,10.08590870034743,36.68999862670932

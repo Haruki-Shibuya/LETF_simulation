@@ -240,6 +240,7 @@ repo:
 
 - `TQQQ` のように benchmark が比較的一貫している商品は、この方法がかなり素直にハマる
 - `SOXL` のように benchmark history が分断される商品は、`legacy benchmark -> modern proxy` の **hybrid underlier** を候補に入れて live overlap で選ぶ方が実務的
+- `TMF` のように live benchmark proxy (`TLT`) はあるが pre-inception が足りない商品は、**legacy fund proxy (`VUSTX`) -> live ETF proxy (`TLT`)** の二段構成が扱いやすい
 
 ### B. Volatility ETP / LETF (`UVIX`, `UVXY`, `VXX` など)
 
@@ -330,6 +331,8 @@ repo:
 - [`tqqq_backtest/extend_tqqq_history.py`](../tqqq_backtest/extend_tqqq_history.py)
 - [`soxl_backtest/README.md`](../soxl_backtest/README.md)
 - [`soxl_backtest/extend_soxl_history.py`](../soxl_backtest/extend_soxl_history.py)
+- [`tmf_backtest/README.md`](../tmf_backtest/README.md)
+- [`tmf_backtest/extend_tmf_history.py`](../tmf_backtest/extend_tmf_history.py)
 - [`uvix_backtest/README.md`](../uvix_backtest/README.md)
 - [`uvix_backtest/rsi_entry_exit_optimize.py`](../uvix_backtest/rsi_entry_exit_optimize.py)
 

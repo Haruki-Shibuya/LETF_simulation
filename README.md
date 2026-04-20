@@ -14,6 +14,9 @@
 - [`soxl_backtest/`](./soxl_backtest/)
   - `SOXL` を semiconductor benchmark proxy から長期延長する workspace
   - `legacy SOX / modern SOXX / hybrid` を比較して canonical model を選びます
+- [`tmf_backtest/`](./tmf_backtest/)
+  - `TMF` を long-duration Treasury proxy から `1991` まで延長する workspace
+  - `VUSTX -> TLT` benchmark proxy と `TMF` overlap calibration を含みます
 - [`docs/letf_backtest_methodology.md`](./docs/letf_backtest_methodology.md)
   - testfol, GitHub research, official methodology, 現状ベストプラクティスをまとめたノート
 
@@ -42,4 +45,13 @@
 - calibrated financing multiplier: `0.7849591928`
 - canonical export: `soxl_backtest/output/soxl_extension.csv`
 
-詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md) を参照してください。
+`TMF` workspace の current canonical result:
+
+- requested history start: `1991-01-01`
+- actual reproducible history start: `1991-01-02`
+- live calibration anchor: `2009-04-16`
+- canonical legacy proxy variant: `raw VUSTX`
+- calibrated financing multiplier: `2.8684935350`
+- canonical export: `tmf_backtest/output/tmf_extension_1991.csv`
+
+詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md), [`tmf_backtest/README.md`](./tmf_backtest/README.md) を参照してください。
