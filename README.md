@@ -11,6 +11,8 @@
 - [`tqqq_backtest/`](./tqqq_backtest/)
   - `TQQQ` を `^NDX` から `1991` まで延長する synthetic / stitched workspace
   - calibration summary, overlap diagnostics, long-history export を含みます
+- [`docs/letf_backtest_methodology.md`](./docs/letf_backtest_methodology.md)
+  - testfol, GitHub research, official methodology, 現状ベストプラクティスをまとめたノート
 
 ## Current Focus
 
