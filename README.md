@@ -17,6 +17,9 @@
 - [`tmf_backtest/`](./tmf_backtest/)
   - `TMF` を long-duration Treasury proxy から `1991` まで延長する workspace
   - `VUSTX -> TLT` benchmark proxy と `TMF` overlap calibration を含みます
+- [`ugl_backtest/`](./ugl_backtest/)
+  - `UGL` を `GLD` proxy で `2005-12-20` まで延長する workspace
+  - overlap calibration と canonical stitched export を含みます
 - [`docs/letf_backtest_methodology.md`](./docs/letf_backtest_methodology.md)
   - testfol, GitHub research, official methodology, 現状ベストプラクティスをまとめたノート
 
@@ -54,4 +57,14 @@
 - calibrated financing multiplier: `2.8684935350`
 - canonical export: `tmf_backtest/output/tmf_extension_1991.csv`
 
-詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md), [`tmf_backtest/README.md`](./tmf_backtest/README.md) を参照してください。
+`UGL` workspace の current canonical result:
+
+- requested history start: `2005-12-20`
+- actual reproducible history start: `2005-12-20`
+- live calibration anchor: `2008-12-03`
+- calibrated financing multiplier: `2.2053200000`
+- canonical export: `ugl_backtest/output/ugl_extension_20051220.csv`
+
+この状態で、`uvix_backtest/rsi_entry_exit_optimize.py` は sibling workspaces の stitched `TQQQ/SOXL/TMF/UGL` series を既定で読むので、`stitched_uvix_longvol_2x` を `2005-12-20 .. latest` で最適化できます。
+
+詳細は [`uvix_backtest/README.md`](./uvix_backtest/README.md), [`tqqq_backtest/README.md`](./tqqq_backtest/README.md), [`soxl_backtest/README.md`](./soxl_backtest/README.md), [`tmf_backtest/README.md`](./tmf_backtest/README.md), [`ugl_backtest/README.md`](./ugl_backtest/README.md) を参照してください。

@@ -1,0 +1,2 @@
+requested_history_start,actual_history_start,history_end,benchmark_ticker,letf_ticker,rate_series_id,leverage,annual_fee,calibrated_financing_multiplier,actual_inception,actual_anchor_price,canonical_start_level,canonical_end_level
+2005-12-20,2005-12-20,2026-04-17,GLD,UGL,DGS3MO,2.0,0.0095,2.20532004465349,2008-12-03,6.204999923706055,3.980364222824718,65.65000152588004

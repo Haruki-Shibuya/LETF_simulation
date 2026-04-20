@@ -1,0 +1,2 @@
+dataset,vol_label,entry,exit,cagr,final_multiple,max_drawdown,trade_count,vol_days,start_date,end_date
+stitched_uvix_longvol_2x,UVIX_LONGVOL_2X_STITCHED,71.0,68.0,0.8216840825858787,196612.6083946681,-0.7357105587826549,240,356,2005-12-20,2026-04-17

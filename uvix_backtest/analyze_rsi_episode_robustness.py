@@ -62,6 +62,8 @@ def build_prices() -> pd.DataFrame:
     tickers = sorted({opt.SIGNAL_TICKER, "SOXL", "TQQQ", "UGL", "TMF", "UVIX", "UVXY"})
     prices = opt.download_adj_close(tickers, start=opt.DEFAULT_FETCH_START, end=None)
     prices, _ = opt.enrich_with_volatility_series(prices)
+    overrides = opt.load_extended_price_overrides()
+    prices = opt.apply_extended_price_overrides(prices, overrides)
     return prices
 
 

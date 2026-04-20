@@ -77,6 +77,47 @@
 
 - `entry = 71.0 / exit = 68.0` の baseline は、`stitched_uvix_longvol_2x` で `CAGR = 94.4853%` です。
 
+## Extended LETF Integration
+
+現在の `rsi_entry_exit_optimize.py` は、sibling workspaces の stitched LETF series を既定で読みます。
+
+- `TQQQ`: [`../tqqq_backtest/output/tqqq_extension_1991.csv`](../tqqq_backtest/output/tqqq_extension_1991.csv)
+- `SOXL`: [`../soxl_backtest/output/soxl_extension.csv`](../soxl_backtest/output/soxl_extension.csv)
+- `TMF`: [`../tmf_backtest/output/tmf_extension_1991.csv`](../tmf_backtest/output/tmf_extension_1991.csv)
+- `UGL`: [`../ugl_backtest/output/ugl_extension_20051220.csv`](../ugl_backtest/output/ugl_extension_20051220.csv)
+
+これにより、`UVIX` canonical の最長 start である `2005-12-20` に strategy 全体を揃えられるようになりました。
+
+raw ETF のみで回したいときは `--disable-extended-letf-series` を付けます。
+
+## Extended 2005 Result
+
+前提:
+
+- dataset: `stitched_uvix_longvol_2x`
+- backtest window: `2005-12-20 .. 2026-04-17`
+- grid: `entry/exit = 0.1` 刻み
+
+最適値:
+
+- `entry = 69.4`
+- `exit = 65.4`
+- `CAGR = 93.1865%`
+- `MDD = -72.9995%`
+- `trade_count = 279`
+- `vol_days = 532`
+
+baseline:
+
+- `entry = 71.0 / exit = 68.0`
+- `CAGR = 82.1684%`
+
+主な出力:
+
+- [overview 2005](./output/rsi_entry_exit_optimization_overview_from_20051220_entrystep_0p1_exitstep_0p1.csv)
+- [stitched full grid 2005](./output/stitched_uvix_longvol_2x_full_grid_from_20051220_entrystep_0p1_exitstep_0p1.csv)
+- [stitched top10 2005](./output/stitched_uvix_longvol_2x_top10_from_20051220_entrystep_0p1_exitstep_0p1.csv)
+
 ## Robustness Result
 
 高RSIエピソードを full-sample optimum `70.1 / 68.9` で定義し、`leave-one-episode-out` を回しました。
@@ -124,6 +165,12 @@ Key outputs:
 /usr/bin/python3 rsi_entry_exit_optimize.py --backtest-start 2011-01-01 --entry-step 0.1 --exit-step 0.1
 ```
 
+2005-12-20 から最適化:
+
+```bash
+/usr/bin/python3 rsi_entry_exit_optimize.py --backtest-start 2005-12-20 --entry-step 0.1 --exit-step 0.1
+```
+
 Surface / heatmap を再生成:
 
 ```bash
@@ -141,3 +188,4 @@ leave-one-episode-out を再実行:
 - `interactive 3D surface` は Plotly CDN を読むので、表示時にネット接続が必要です。
 - データ取得元は主に `yfinance` と Cboe の `LONGVOL` historical API です。
 - `strict_uvix` はあくまで実 `UVIX` だけの短期チェック用です。長期の canonical 議論は `stitched_uvix_longvol_2x` を使ってください。
+- `2005-12-20` 以前は `UVIX` 側 canonical が存在しないため、この strategy の最長開始日は `2005-12-20` です。

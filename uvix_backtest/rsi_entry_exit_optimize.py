@@ -10,8 +10,9 @@ import requests
 import yfinance as yf
 
 
-DEFAULT_FETCH_START = "2009-01-01"
 BASE_DIR = Path(__file__).resolve().parent
+REPO_DIR = BASE_DIR.parent
+DEFAULT_FETCH_START = "2004-01-01"
 OUTPUT_DIR = BASE_DIR / "output"
 LONGVOL_HISTORY_URL = "https://cdn.cboe.com/api/global/delayed_quotes/charts/historical/_LONGVOL.json"
 TRADING_DAYS_PER_YEAR = 252
@@ -20,6 +21,24 @@ UVIX_ANNUAL_FEE = 0.0165
 SIGNAL_TICKER = "^GSPC"
 SIGNAL_RSI_COL = "SIGNAL_RSI_14"
 SIGNAL_SMA_COL = "SIGNAL_SMA_160"
+EXTENDED_PRICE_SOURCES = {
+    "TQQQ": {
+        "path": REPO_DIR / "tqqq_backtest" / "output" / "tqqq_extension_1991.csv",
+        "column": "TQQQ_3X_CALIBRATED_STITCHED",
+    },
+    "SOXL": {
+        "path": REPO_DIR / "soxl_backtest" / "output" / "soxl_extension.csv",
+        "column": "SOXL_3X_CANONICAL_STITCHED",
+    },
+    "TMF": {
+        "path": REPO_DIR / "tmf_backtest" / "output" / "tmf_extension_1991.csv",
+        "column": "TMF_3X_CALIBRATED_STITCHED",
+    },
+    "UGL": {
+        "path": REPO_DIR / "ugl_backtest" / "output" / "ugl_extension_20051220.csv",
+        "column": "UGL_2X_CALIBRATED_STITCHED",
+    },
+}
 
 
 @dataclass(frozen=True)
@@ -77,6 +96,38 @@ def download_adj_close(tickers: list[str], start: str, end: str | None) -> pd.Da
     close = close.rename_axis(index="Date", columns="Ticker")
     close = close.sort_index()
     return close
+
+
+def load_extended_price_overrides() -> pd.DataFrame:
+    series_map: dict[str, pd.Series] = {}
+    missing: list[Path] = []
+
+    for ticker, spec in EXTENDED_PRICE_SOURCES.items():
+        path = spec["path"]
+        column = spec["column"]
+        if not path.exists():
+            missing.append(path)
+            continue
+        frame = pd.read_csv(path, parse_dates=["Date"]).set_index("Date")
+        series = pd.to_numeric(frame[column], errors="coerce").rename(ticker)
+        series_map[ticker] = series
+
+    if missing:
+        missing_text = "\n".join(str(path) for path in missing)
+        raise FileNotFoundError(
+            "Extended LETF series are missing. Generate these files first:\n"
+            f"{missing_text}"
+        )
+
+    return pd.DataFrame(series_map).sort_index()
+
+
+def apply_extended_price_overrides(prices: pd.DataFrame, overrides: pd.DataFrame) -> pd.DataFrame:
+    expanded_index = prices.index.union(overrides.index)
+    merged = prices.reindex(expanded_index).sort_index()
+    for ticker in overrides.columns:
+        merged[ticker] = overrides[ticker].reindex(expanded_index)
+    return merged
 
 
 def download_longvol_index() -> pd.Series:
@@ -498,6 +549,11 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Also run the legacy UVXY comparison dataset.",
     )
+    parser.add_argument(
+        "--disable-extended-letf-series",
+        action="store_true",
+        help="Use raw ETF price history for TQQQ/SOXL/TMF/UGL instead of stitched workspace series.",
+    )
     return parser.parse_args()
 
 
@@ -527,6 +583,9 @@ def main() -> None:
     market_tickers = sorted({SIGNAL_TICKER, "SOXL", "TQQQ", "UGL", "TMF", "UVIX", "UVXY"})
     prices = download_adj_close(market_tickers, start=args.fetch_start, end=args.fetch_end)
     prices, proxy_compare = enrich_with_volatility_series(prices)
+    if not args.disable_extended_letf_series:
+        overrides = load_extended_price_overrides()
+        prices = apply_extended_price_overrides(prices, overrides)
     datasets = build_datasets(include_uvxy=args.include_uvxy)
     output_suffix = build_output_suffix(
         args.backtest_start,
