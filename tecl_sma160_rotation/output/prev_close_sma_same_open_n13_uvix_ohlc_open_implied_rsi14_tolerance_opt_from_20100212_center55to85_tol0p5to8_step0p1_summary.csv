@@ -1,0 +1,2 @@
+execution_timing,start,rsi_center,rsi_tolerance,rsi_entry,rsi_exit,cagr,annualized_vol,max_drawdown,final_multiple,trade_count,uvix_days,uvix_day_share,days,base_strategy,uvix_return,uvix_signal,rule
+prev_close_sma_same_open_base_uvix_open_implied_rsi_uvix_ohlc_tolerance,2010-02-12,66.8,0.7,67.5,66.1,1.1695307479833095,0.6721250063991269,-0.6596191930231605,269923.06530875457,237,614,0.15089702629638732,4069,prev_close_sma_same_open_n13p0,uvix_ohlc_series_cto_otc,gspc_open_implied_rsi14,entry=center+tolerance; exit=center-tolerance

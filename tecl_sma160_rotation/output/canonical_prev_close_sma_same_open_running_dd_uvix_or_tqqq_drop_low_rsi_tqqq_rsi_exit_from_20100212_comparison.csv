@@ -1,0 +1,5 @@
+cagr,annualized_vol,max_drawdown,final_multiple,strategy,tqqq_drop_exit_pct,uvix_entries,uvix_exits,uvix_day_share,start,low_rsi_entry,rsi_exit,override_entries,override_exits,override_day_share,wait_exit_day_share,uvix_entry_rsi,uvix_exit_rsi,uvix_tqqq_drop_exit_pct,low_rsi_exit,low_rsi_entries,low_rsi_exits,low_rsi_day_share
+0.9942158118704723,0.6377452693256808,-0.6816049710899797,69241.84827801966,old_uvix_rsi_exit_only,,,,,,,,,,,,,,,,,,
+1.1131959110355116,0.6337259345140012,-0.676571553309006,176500.36025955892,uvix_rsi_or_tqqq_drop_exit,0.0,116.0,115.0,0.0813467682477267,,,,,,,,,,,,,,
+1.041463968029738,0.6402501262384445,-0.6621446903430857,101058.9589091784,old_uvix_plus_low_rsi_tqqq_rsi_exit,,,,,2010-02-12,30.0,32.5,11.0,11.0,0.005898255099533,0.0027033669206193,,,,,,,
+1.0645579128727913,0.6402792141107387,-0.6568036304375773,121187.47190190839,combined_new_canonical,,127.0,126.0,0.08871958712214303,2010-02-12,30.0,,,,,,69.5,68.5,0.0,32.5,11.0,11.0,0.005898255099533055

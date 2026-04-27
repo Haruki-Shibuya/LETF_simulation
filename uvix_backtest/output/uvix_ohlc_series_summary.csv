@@ -1,0 +1,2 @@
+asset,start,end,rows,max_abs_return_rebuild_diff,actual_source_days,synthetic_source_days,vix_proxy_days,uvxy_proxy_days
+UVIX,2005-12-20,2026-04-24,5117,6.660158535787275e-12,1020,4097,1953,3660

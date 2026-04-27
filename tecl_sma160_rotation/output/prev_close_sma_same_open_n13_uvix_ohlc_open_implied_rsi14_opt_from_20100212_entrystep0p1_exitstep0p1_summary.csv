@@ -1,0 +1,2 @@
+execution_timing,start,rsi_entry,rsi_exit,cagr,annualized_vol,max_drawdown,final_multiple,trade_count,uvix_days,uvix_day_share,days,base_strategy,uvix_return,uvix_signal
+prev_close_sma_same_open_base_uvix_open_implied_rsi_uvix_ohlc,2010-02-12,66.0,66.0,1.2012069832488192,0.6880052004996167,-0.6596191930231603,341102.9149527262,329,733,0.18014254116490538,4069,prev_close_sma_same_open_n13p0,uvix_ohlc_series_cto_otc,gspc_open_implied_rsi14

@@ -35,6 +35,17 @@
 - robust OOS optimum: `entry = 67.9`, `exit = 65.5`
 - robust validation split: `2006-01-03 .. 2022-12-30`, final holdout: `2023-01-03 .. 2026-04-17`
 
+`TECL SMA160 Rotation` workspace の provisional canonical candidate:
+
+- strategy name: `prev_close_sma_same_open_running_dd_uvix_or_tqqq_drop_low_rsi_tqqq_rsi_exit`
+- backtest window: `2010-02-12 .. 2026-04-17`
+- base signal: previous `GSPC Close SMA160`, judged against current `GSPC Open`
+- TQQQ re-entry: running drawdown from `TQQQ Open` peak, `alpha=54.5%`
+- UVIX overlay: `GSPC open-implied RSI14`, entry `69.5`, exit `RSI <= 68.5` or `TQQQ Open <= entry-time TQQQ Open`
+- low-RSI TQQQ override: entry `RSI < 30`, exit `RSI >= 32.5`
+- result: CAGR `106.46%`, vol `64.03%`, max drawdown `-65.68%`
+- note: provisional only; OOS / slippage / execution-cost checks are still pending
+
 `TQQQ` workspace の current canonical result:
 
 - benchmark: `^NDX`

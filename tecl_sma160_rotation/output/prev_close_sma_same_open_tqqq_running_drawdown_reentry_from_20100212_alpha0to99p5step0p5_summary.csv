@@ -1,0 +1,2 @@
+start,signal_window,entry_rule,alpha_drawdown_pct,cagr,annualized_vol,max_drawdown,final_multiple,below_regime_share,wait_regime_share
+2010-02-12,160,tqqq_open_drawdown_from_running_peak,54.5,0.5354200141730534,0.5795400280857189,-0.6695760370660963,1016.1973064017592,0.14966822315065126,0.0439911526173507

@@ -316,6 +316,15 @@ repo:
   - **benchmark-faithful daily-reset synthetic + live overlap calibration + return-space stitching**
 - `UVIX` 系:
   - **VIX futures index-faithful synthetic + actual overlap validation + return-space stitching**
+- `TQQQ + UVIX tactical overlay`:
+  - provisional candidate は `prev_close_sma_same_open_running_dd_uvix_or_tqqq_drop_low_rsi_tqqq_rsi_exit`
+  - 実運用手順は毎営業日のOpen近辺で上から順に判定する
+  - まずUVIX保有中なら、`RSI <= 68.5` または `TQQQ Open <= UVIX entry時のTQQQ Open` でexitする
+  - UVIX非保有で `GSPC open-implied RSI14 >= 69.5` ならUVIXへ入る
+  - UVIX非保有かつbaseが待機中で `RSI < 30` ならTQQQへ入り、`RSI >= 32.5` で待機mixへ戻る
+  - それ以外はbaseに従う。baseは前日 `GSPC Close SMA160` を当日 `GSPC Open` で判定し、SMA未満では原則待機する
+  - TQQQの底拾いは cross-under価格基準ではなく、`TQQQ Open` のrunning peakからの drawdown `alpha=54.5%` で判定する
+  - これは full-sample provisional であり、OOS / slippage / execution-cost 検証前の正式canonicalではない
 
 つまり、
 

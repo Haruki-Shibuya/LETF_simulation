@@ -1,0 +1,2 @@
+best_signal_window,best_drawdown_pct,best_cagr,best_annualized_vol,best_max_drawdown,best_final_multiple,baseline_signal_window,baseline_drawdown_pct,baseline_cagr,baseline_annualized_vol,baseline_max_drawdown,baseline_final_multiple,m_min,m_max,m_step,n_min,n_max,n_step
+2,55.0,-0.1497614860595674,0.4906131939952222,-0.9984636962575704,0.019635472751966792,,,,,,,2,2,1,55.0,55.0,1.0

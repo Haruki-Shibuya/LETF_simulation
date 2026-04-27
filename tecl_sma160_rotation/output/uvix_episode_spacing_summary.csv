@@ -1,0 +1,2 @@
+episodes,episodes_with_spacing,win_rate,average_return,median_return,average_holding_days,median_holding_days,correlation_spacing_vs_return,correlation_calendar_spacing_vs_return
+97,96,0.6701030927835051,0.03637270371157792,0.030941502907246177,3.7216494845360826,2.0,-0.06629166142710295,-0.06564852514164583

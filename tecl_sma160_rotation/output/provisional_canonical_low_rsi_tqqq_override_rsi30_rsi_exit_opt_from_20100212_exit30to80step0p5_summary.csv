@@ -1,0 +1,2 @@
+start,low_rsi_entry,rsi_exit,cagr,annualized_vol,max_drawdown,final_multiple,override_entries,override_exits,override_day_share,wait_exit_day_share
+2010-02-12,30.0,32.5,1.041463968029738,0.6402501262384445,-0.6621446903430857,101058.95890917839,11,11,0.005898255099533055,0.002703366920619317

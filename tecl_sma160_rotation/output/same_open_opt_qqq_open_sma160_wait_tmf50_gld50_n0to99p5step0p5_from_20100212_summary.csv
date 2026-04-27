@@ -1,0 +1,2 @@
+signal,start,signal_window,below_entry_drawdown_pct,cagr,annualized_vol,max_drawdown,final_multiple,below_regime_share,wait_regime_share
+QQQ,2010-02-12,160,14.0,0.4894784716263916,0.5858705484141558,-0.7321678567208875,622.2336689071285,0.12337183583189973,0.05160973212091423
