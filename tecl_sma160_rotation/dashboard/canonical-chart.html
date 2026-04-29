@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canonical — GSPC / UVIX / RSI (interactive)</title>
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+    <style>
+      .chart-page {
+        max-width: none;
+        margin: 0 auto;
+        padding: 0.75rem 1rem 1rem;
+        box-sizing: border-box;
+        min-height: 100vh;
+      }
+      .chart-page h1 {
+        font-size: 1.2rem;
+        margin-bottom: 0.35rem;
+      }
+      .chart-page .note {
+        color: #555;
+        font-size: 0.82rem;
+        margin-bottom: 0.6rem;
+      }
+      .episode-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem 1rem;
+        margin-bottom: 0.75rem;
+        padding: 0.65rem 0.85rem;
+        background: #f5f7fa;
+        border: 1px solid #e0e6ed;
+        border-radius: 8px;
+      }
+      .episode-toolbar button {
+        font-size: 1.35rem;
+        line-height: 1;
+        min-width: 2.75rem;
+        padding: 0.35rem 0.6rem;
+        cursor: pointer;
+        border: 1px solid #b0bec5;
+        border-radius: 6px;
+        background: #fff;
+      }
+      .episode-toolbar button:disabled {
+        opacity: 0.35;
+        cursor: not-allowed;
+      }
+      .episode-toolbar .episode-slider-wrap {
+        flex: 1 1 240px;
+        min-width: 180px;
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+      .episode-toolbar label {
+        font-size: 0.88rem;
+        color: #333;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.75rem;
+        align-items: baseline;
+      }
+      .episode-toolbar #epRange {
+        color: #666;
+        font-size: 0.82rem;
+      }
+      .episode-toolbar input[type="range"] {
+        width: 100%;
+        cursor: pointer;
+      }
+      .canonical-plot-heading {
+        padding: 0.85rem 1rem;
+        margin-bottom: 0.5rem;
+        max-width: 100%;
+        background: #ffffff;
+        color: #0f172a;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        border-radius: 10px;
+        box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
+      }
+      .canonical-plot-heading-line {
+        font-size: 0.95rem;
+        font-weight: 700;
+        line-height: 1.42;
+        color: #0f172a;
+        word-break: break-word;
+      }
+      .canonical-plot-heading-meta {
+        font-size: 0.86rem;
+        font-weight: 700;
+        color: #1d4ed8;
+        margin-top: 0.25rem;
+      }
+      .canonical-plot-period {
+        margin-top: 0.4rem;
+        font-size: 0.88rem;
+        font-weight: 600;
+        color: #334155;
+        word-break: break-word;
+      }
+      .canonical-plot-explain {
+        margin: 0.5rem 0 0;
+        font-size: 0.84rem;
+        line-height: 1.52;
+        color: #1e293b;
+        padding: 0.55rem 0.65rem;
+        background: #f1f5f9;
+        border-radius: 8px;
+        border: 1px solid #cbd5e1;
+        max-width: 100%;
+      }
+      #chart {
+        width: 100%;
+        min-height: 360px;
+      }
+      #chartError {
+        color: #a22;
+        white-space: pre-wrap;
+      }
+      .nav-back {
+        margin-bottom: 0.6rem;
+      }
+      .nav-back a {
+        color: #1565c0;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="chart-page">
+      <p class="nav-back"><a href="/index.html">← Dashboard に戻る</a></p>
+      <h1>Canonical 時系列（インタラクティブ）</h1>
+      <p class="note">
+        ローカルで <code>python3 build_canonical_chart_html_embedded.py</code> を実行すると、下の
+        <code>&lt;script id=&quot;__canonicalEmbed&quot;&gt;</code> に系列が埋め込まれ、<strong>fetch なしで描画</strong>できます（リリース前テストはこれを前提）。
+      </p>
+      <div id="episodeToolbar" class="episode-toolbar" hidden>
+        <button type="button" id="epPrev" aria-label="前のエピソード">←</button>
+        <div class="episode-slider-wrap">
+          <label for="epSlider">
+            <span id="epLabel">エピソード</span>
+            <span id="epRange"></span>
+          </label>
+          <input type="range" id="epSlider" min="0" max="0" value="0" />
+        </div>
+        <button type="button" id="epNext" aria-label="次のエピソード">→</button>
+      </div>
+      <div id="chartError"></div>
+      <div id="canonicalPlotHeading" class="canonical-plot-heading" hidden aria-live="polite">
+        <div id="canonicalPlotHeadingLines"></div>
+        <div class="canonical-plot-period" id="canonicalPlotPeriod"></div>
+        <p class="canonical-plot-explain" id="canonicalPlotExplain" hidden></p>
+      </div>
+      <div id="chart"></div>
+    </main>
+    <script id="__canonicalEmbed" type="application/json">{}</script>
+    <script src="canonical-chart.js" defer></script>
+  </body>
+</html>
