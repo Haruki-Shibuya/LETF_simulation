@@ -7,6 +7,12 @@
   const slider = document.getElementById("epSlider");
   const lblEp = document.getElementById("epLabel");
   const rngEp = document.getElementById("epRange");
+  const metricDays = document.getElementById("metricDays");
+  const metricEntryRsi = document.getElementById("metricEntryRsi");
+  const metricExitRsi = document.getElementById("metricExitRsi");
+  const metricGspcReturn = document.getElementById("metricGspcReturn");
+  const metricUvixReturn = document.getElementById("metricUvixReturn");
+  const metricEpisode = document.getElementById("metricEpisode");
 
   let fullData = null;
   let episodeIndex = 0;
@@ -72,8 +78,30 @@
     var tb = toolbar && !toolbar.hidden ? toolbar.offsetHeight : 0;
     var head = document.getElementById("canonicalPlotHeading");
     var hh = head && !head.hidden ? head.offsetHeight + 8 : 0;
-    var reserve = 200;
-    return Math.max(360, window.innerHeight - tb - hh - reserve);
+    var reserve = window.innerWidth < 700 ? 330 : 285;
+    return Math.max(470, window.innerHeight - tb - hh - reserve);
+  }
+
+  function fmtNum(value, digits) {
+    if (value == null || Number(value) !== Number(value)) return "-";
+    return Number(value).toLocaleString("en-US", {
+      minimumFractionDigits: digits,
+      maximumFractionDigits: digits,
+    });
+  }
+
+  function fmtPct(value) {
+    if (value == null || Number(value) !== Number(value)) return "-";
+    var signed = Number(value);
+    return (signed > 0 ? "+" : "") + (signed * 100).toFixed(2) + "%";
+  }
+
+  function setReturnMetric(node, value) {
+    if (!node) return;
+    node.textContent = fmtPct(value);
+    node.classList.remove("positive", "negative");
+    if (value > 0) node.classList.add("positive");
+    if (value < 0) node.classList.add("negative");
   }
 
   function isoToJpLong(iso) {
@@ -171,25 +199,47 @@
     }
 
     var paneLabels = [
-      { y: mid(d1), text: "GSPC close÷entry" },
-      { y: mid(d2), text: "UVIX÷entry" },
+      { y: mid(d1), text: "GSPC" },
+      { y: mid(d2), text: "UVIX" },
       { y: mid(d3), text: "RSI14" },
     ];
     var labelAnn = paneLabels.map(function (pl) {
       return {
         xref: "paper",
         yref: "paper",
-        x: 0.02,
+        x: 0.025,
         xanchor: "left",
         y: pl.y,
         yanchor: "middle",
         text: "<b>" + pl.text + "</b>",
         showarrow: false,
-        font: { size: 11, color: "#263238" },
+        font: { size: 11, color: "#475467" },
       };
     });
 
     var thresholdShapes = [
+      {
+        type: "line",
+        xref: "paper",
+        yref: "y",
+        x0: 0,
+        x1: 1,
+        y0: 1,
+        y1: 1,
+        line: { color: "#98a2b3", width: 1, dash: "dot" },
+        layer: "below",
+      },
+      {
+        type: "line",
+        xref: "paper",
+        yref: "y2",
+        x0: 0,
+        x1: 1,
+        y0: 1,
+        y1: 1,
+        line: { color: "#98a2b3", width: 1, dash: "dot" },
+        layer: "below",
+      },
       {
         type: "line",
         xref: "paper",
@@ -198,7 +248,7 @@
         x1: 1,
         y0: entryThr,
         y1: entryThr,
-        line: { color: "#666", width: 1, dash: "dash" },
+        line: { color: "#475467", width: 1, dash: "dash" },
         layer: "below",
       },
       {
@@ -209,7 +259,7 @@
         x1: 1,
         y0: exitThr,
         y1: exitThr,
-        line: { color: "#888", width: 1, dash: "dot" },
+        line: { color: "#667085", width: 1, dash: "dot" },
         layer: "below",
       },
     ];
@@ -217,23 +267,25 @@
     return {
       height: chartHeightPx(),
       dragmode: "zoom",
-      margin: { l: 88, r: 200, t: 52, b: 128 },
+      paper_bgcolor: "#ffffff",
+      plot_bgcolor: "#ffffff",
+      font: { family: "Inter, ui-sans-serif, system-ui, sans-serif", color: "#111827" },
+      margin: { l: 78, r: 22, t: 22, b: 92 },
       hovermode: "x unified",
       showlegend: true,
       title: { text: "" },
       annotations: labelAnn,
       legend: {
-        orientation: "v",
+        orientation: "h",
         xref: "paper",
         yref: "paper",
-        x: 1.005,
-        y: 1,
+        x: 0.12,
+        y: -0.12,
         xanchor: "left",
         yanchor: "top",
-        bgcolor: "rgba(255,255,255,0.97)",
-        bordercolor: "#cfd8dc",
-        borderwidth: 1,
-        font: { size: 10 },
+        bgcolor: "rgba(255,255,255,0)",
+        borderwidth: 0,
+        font: { size: 11 },
         itemsizing: "constant",
         traceorder: "normal",
       },
@@ -242,10 +294,11 @@
       xaxis: {
         title: { text: "日付（営業日・年付き）", font: { size: 11 } },
         type: "date",
-        domain: [0.12, 0.72],
+        domain: [0.12, 0.985],
         anchor: "y3",
         automargin: true,
         showgrid: true,
+        gridcolor: "#edf0f4",
         zeroline: false,
         showspikes: true,
         spikemode: "across",
@@ -256,34 +309,37 @@
         tickformat: "%Y-%m-%d",
         dtick: dayMs,
         tickangle: -45,
-        tickfont: { size: 11 },
+        tickfont: { size: 10, color: "#667085" },
         range: paddedXAxisRangeForPlotly(sliced.dates),
       },
       yaxis: {
         title: { text: "" },
-        tickfont: { size: 10 },
+        tickfont: { size: 10, color: "#667085" },
         domain: d1,
         anchor: "x",
         automargin: false,
         showgrid: true,
+        gridcolor: "#edf0f4",
         zeroline: false,
       },
       yaxis2: {
         title: { text: "" },
-        tickfont: { size: 10 },
+        tickfont: { size: 10, color: "#667085" },
         domain: d2,
         anchor: "x",
         automargin: false,
         showgrid: true,
+        gridcolor: "#edf0f4",
         zeroline: false,
       },
       yaxis3: {
         title: { text: "" },
-        tickfont: { size: 10 },
+        tickfont: { size: 10, color: "#667085" },
         domain: d3,
         anchor: "x",
         automargin: false,
         showgrid: true,
+        gridcolor: "#edf0f4",
         zeroline: false,
       },
       shapes: thresholdShapes,
@@ -394,7 +450,7 @@
         x: xPlot,
         y: gspcY,
         connectgaps: false,
-        line: { color: "#1f77b4", width: lineW },
+        line: { color: "#2563eb", width: lineW },
         _marker: mkCol("#0d47a1"),
         yaxis: "y",
         xaxis: "x",
@@ -407,7 +463,7 @@
         x: xPlot,
         y: uvixY,
         connectgaps: false,
-        line: { color: "#2ca02c", width: lineW },
+        line: { color: "#16a34a", width: lineW },
         _marker: mkCol("#1b5e20"),
         yaxis: "y2",
         xaxis: "x",
@@ -419,7 +475,7 @@
         name: "RSI(14)",
         x: xPlot,
         y: rsiY,
-        line: { color: "#ff7f0e", width: lineW },
+        line: { color: "#f97316", width: lineW },
         _marker: mkCol("#e65100"),
         yaxis: "y3",
         xaxis: "x",
@@ -462,6 +518,12 @@
     slider.value = String(epIdx);
     btnPrev.disabled = epIdx <= 0;
     btnNext.disabled = epIdx >= epCount - 1;
+    if (metricDays) metricDays.textContent = (span.days || 0) + "営業日";
+    if (metricEntryRsi) metricEntryRsi.textContent = fmtNum(span.entry_rsi, 2);
+    if (metricExitRsi) metricExitRsi.textContent = fmtNum(span.exit_rsi, 2);
+    if (metricEpisode) metricEpisode.textContent = (epIdx + 1) + " / " + epCount;
+    setReturnMetric(metricGspcReturn, span.gspc_return);
+    setReturnMetric(metricUvixReturn, span.uvix_return);
   }
 
   function renderEpisode(idx, opts) {

@@ -1,11 +1,10 @@
 from __future__ import annotations
 
+import csv
 import json
 import math
 from pathlib import Path
 from typing import Any
-
-import pandas as pd
 
 
 BASE_DIR = Path(__file__).resolve().parent
@@ -21,7 +20,7 @@ UVIX_OHLC_PATH = REPO_DIR / "uvix_backtest" / "output" / "uvix_ohlc_series.csv"
 
 
 def finite_or_none(value: Any) -> float | None:
-    if value is None:
+    if value in {None, ""}:
         return None
     try:
         number = float(value)
@@ -32,25 +31,26 @@ def finite_or_none(value: Any) -> float | None:
     return number
 
 
-def _jsonable_series(series: pd.Series) -> list[float | None]:
-    return [finite_or_none(value) for value in series.tolist()]
-
-
-def _read_csv(path: Path, *, parse_dates: list[str]) -> pd.DataFrame:
+def _read_rows(path: Path) -> list[dict[str, str]]:
     if not path.exists():
         raise FileNotFoundError(f"required file is missing: {path}")
-    return pd.read_csv(path, parse_dates=parse_dates).sort_values(parse_dates[0])
+    with path.open(newline="", encoding="utf-8") as f:
+        return sorted(csv.DictReader(f), key=lambda row: row["Date"])
 
 
-def _load_meta() -> dict[str, float | str | int | None]:
-    if not CANONICAL_SUMMARY_PATH.exists():
-        return {"entry_rsi": 69.5, "exit_rsi": 68.5}
-    row = pd.read_csv(CANONICAL_SUMMARY_PATH).iloc[0].to_dict()
-    meta: dict[str, float | str | int | None] = {}
+def _read_one(path: Path) -> dict[str, str]:
+    if not path.exists():
+        return {}
+    with path.open(newline="", encoding="utf-8") as f:
+        return next(csv.DictReader(f), {})
+
+
+def _load_meta() -> dict[str, float | str | None]:
+    row = _read_one(CANONICAL_SUMMARY_PATH)
+    meta: dict[str, float | str | None] = {}
     for key, value in row.items():
-        meta[key] = finite_or_none(value)
-        if meta[key] is None and value == value:
-            meta[key] = str(value)
+        number = finite_or_none(value)
+        meta[key] = number if number is not None else (value or None)
     if "uvix_entry_rsi" in meta:
         meta["entry_rsi"] = meta["uvix_entry_rsi"]
     if "uvix_exit_rsi" in meta:
@@ -60,75 +60,113 @@ def _load_meta() -> dict[str, float | str | int | None]:
     return meta
 
 
-def _uvix_spans(frame: pd.DataFrame) -> list[dict[str, Any]]:
-    hold = frame["uvix_hold"].tolist()
-    dates = frame["Date"].dt.strftime("%Y-%m-%d").tolist()
+def _relative(path: Path) -> str:
+    try:
+        return str(path.relative_to(REPO_DIR))
+    except ValueError:
+        return str(path)
+
+
+def _uvix_spans(rows: list[dict[str, Any]]) -> list[dict[str, Any]]:
     spans: list[dict[str, Any]] = []
     start_i: int | None = None
+    entry_tqqq_open: float | None = None
+    meta = _load_meta()
+    exit_rsi_threshold = finite_or_none(meta.get("exit_rsi")) or 68.5
+    drop_exit_pct = finite_or_none(meta.get("uvix_tqqq_drop_exit_pct")) or 0.0
 
-    for i, is_hold in enumerate(hold):
-        if is_hold and start_i is None:
+    for i, row in enumerate(rows):
+        action = str(row.get("action") or "")
+        if "enter_uvix" in action and start_i is None:
             start_i = i
-        last = i == len(hold) - 1
-        if start_i is not None and ((not is_hold) or last):
-            end_i = i if is_hold and last else i - 1
+            entry_tqqq_open = row["tqqq_open"]
+            continue
+
+        last = i == len(rows) - 1
+        should_close = start_i is not None and ("exit_uvix" in action or last)
+        if should_close:
+            end_i = i
             if end_i >= start_i:
-                segment = frame.iloc[start_i : end_i + 1]
-                entry_gspc = finite_or_none(segment["GSPC_CLOSE"].iloc[0])
-                exit_gspc = finite_or_none(segment["GSPC_CLOSE"].iloc[-1])
-                entry_uvix = finite_or_none(segment["UVIX_CLOSE"].iloc[0])
-                exit_uvix = finite_or_none(segment["UVIX_CLOSE"].iloc[-1])
+                first = rows[start_i]
+                last_row = rows[end_i]
+                entry_gspc = first["gspc_price"]
+                exit_gspc = last_row["gspc_price"]
+                entry_uvix = first["uvix_price"]
+                exit_uvix = last_row["uvix_price"]
+                exit_reasons: list[str] = []
+                if "exit_uvix" in action:
+                    if last_row["rsi"] is not None and last_row["rsi"] <= exit_rsi_threshold:
+                        exit_reasons.append("RSI exit")
+                    tqqq_open = last_row["tqqq_open"]
+                    if entry_tqqq_open is not None and tqqq_open is not None:
+                        drop_trigger = entry_tqqq_open * (1.0 - drop_exit_pct / 100.0)
+                        if tqqq_open <= drop_trigger:
+                            exit_reasons.append("TQQQ open drop exit")
+                elif last:
+                    exit_reasons.append("open episode")
                 spans.append(
                     {
-                        "start": dates[start_i],
-                        "end": dates[end_i],
-                        "days": int(end_i - start_i + 1),
-                        "entry_rsi": finite_or_none(segment["gspc_open_implied_rsi14"].iloc[0]),
-                        "exit_rsi": finite_or_none(segment["gspc_open_implied_rsi14"].iloc[-1]),
-                        "gspc_return": None
-                        if not entry_gspc or exit_gspc is None
-                        else exit_gspc / entry_gspc - 1.0,
-                        "uvix_return": None
-                        if not entry_uvix or exit_uvix is None
-                        else exit_uvix / entry_uvix - 1.0,
+                        "start": first["date"],
+                        "end": last_row["date"],
+                        "days": end_i - start_i + 1,
+                        "entry_rsi": first["rsi"],
+                        "exit_rsi": last_row["rsi"],
+                        "entry_tqqq_open": entry_tqqq_open,
+                        "exit_tqqq_open": last_row["tqqq_open"],
+                        "exit_action": action,
+                        "exit_reason": " + ".join(exit_reasons) if exit_reasons else "exit_uvix",
+                        "gspc_return": None if not entry_gspc or exit_gspc is None else exit_gspc / entry_gspc - 1.0,
+                        "uvix_return": None if not entry_uvix or exit_uvix is None else exit_uvix / entry_uvix - 1.0,
                     }
                 )
             start_i = None
+            entry_tqqq_open = None
     return spans
 
 
 def build_canonical_chart_payload() -> dict[str, Any]:
-    canonical = _read_csv(CANONICAL_DAILY_PATH, parse_dates=["Date"])
-    gspc = _read_csv(GSPC_OHLC_PATH, parse_dates=["Date"])
-    uvix = _read_csv(UVIX_OHLC_PATH, parse_dates=["Date"])
+    canonical = _read_rows(CANONICAL_DAILY_PATH)
+    gspc_by_date = {row["Date"]: finite_or_none(row.get("GSPC_OPEN")) for row in _read_rows(GSPC_OHLC_PATH)}
+    uvix_by_date = {row["Date"]: finite_or_none(row.get("UVIX_OPEN")) for row in _read_rows(UVIX_OHLC_PATH)}
 
-    frame = (
-        canonical.merge(gspc[["Date", "GSPC_CLOSE"]], on="Date", how="inner")
-        .merge(uvix[["Date", "UVIX_CLOSE"]], on="Date", how="inner")
-        .sort_values("Date")
-    )
-    frame["uvix_hold"] = frame["selected_leg"].astype(str).eq("UVIX")
-    frame = frame.dropna(subset=["gspc_open_implied_rsi14", "GSPC_CLOSE", "UVIX_CLOSE"]).reset_index(drop=True)
+    rows: list[dict[str, Any]] = []
+    for row in canonical:
+        date = row["Date"]
+        gspc_price = gspc_by_date.get(date)
+        uvix_price = uvix_by_date.get(date)
+        rsi = finite_or_none(row.get("gspc_open_implied_rsi14"))
+        tqqq_open = finite_or_none(row.get("TQQQ_OPEN"))
+        if gspc_price is None or uvix_price is None or rsi is None:
+            continue
+        rows.append(
+            {
+                "date": date,
+                "gspc_price": gspc_price,
+                "uvix_price": uvix_price,
+                "rsi": rsi,
+                "bb20_z": finite_or_none(row.get("GSPC_BB20_Z")),
+                "tqqq_open": tqqq_open,
+                "action": row.get("action") or "",
+                "uvix_hold": row.get("selected_leg") == "UVIX",
+            }
+        )
 
-    dates = frame["Date"].dt.strftime("%Y-%m-%d").tolist()
-    meta = _load_meta()
-    spans = _uvix_spans(frame)
-
+    spans = _uvix_spans(rows)
     return {
-        "title": "Canonical UVIX high-RSI episodes | GSPC close / UVIX close / RSI14",
-        "subtitle": "GSPC and UVIX are normalized to each episode entry; RSI is plotted on the lower pane.",
-        "dates": dates,
-        "gspc_close": _jsonable_series(frame["GSPC_CLOSE"]),
-        "uvix_close": _jsonable_series(frame["UVIX_CLOSE"]),
-        "rsi": _jsonable_series(frame["gspc_open_implied_rsi14"]),
-        "bb20_z": _jsonable_series(frame["GSPC_BB20_Z"]) if "GSPC_BB20_Z" in frame.columns else None,
-        "uvix_hold": frame["uvix_hold"].tolist(),
+        "title": "Canonical UVIX high-RSI episodes | GSPC open / UVIX open / RSI14",
+        "subtitle": "GSPC and UVIX are normalized to each episode entry open; RSI is plotted on the lower pane.",
+        "dates": [row["date"] for row in rows],
+        "gspc_price": [row["gspc_price"] for row in rows],
+        "uvix_price": [row["uvix_price"] for row in rows],
+        "rsi": [row["rsi"] for row in rows],
+        "bb20_z": [row["bb20_z"] for row in rows],
+        "uvix_hold": [row["uvix_hold"] for row in rows],
         "spans": spans,
-        "meta": meta,
+        "meta": _load_meta(),
         "source_files": {
-            "canonical_daily": str(CANONICAL_DAILY_PATH.relative_to(REPO_DIR)),
-            "gspc_ohlc": str(GSPC_OHLC_PATH.relative_to(REPO_DIR)),
-            "uvix_ohlc": str(UVIX_OHLC_PATH.relative_to(REPO_DIR)),
+            "canonical_daily": _relative(CANONICAL_DAILY_PATH),
+            "gspc_open": _relative(GSPC_OHLC_PATH),
+            "uvix_open": _relative(UVIX_OHLC_PATH),
         },
     }
 
