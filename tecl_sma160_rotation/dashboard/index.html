@@ -3,73 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>TQQQ / UVIX Strategy Dashboard</title>
-    <link rel="stylesheet" href="/styles.css" />
+    <meta http-equiv="refresh" content="0; url=/canonical-chart.html" />
+    <title>LETF Simulation Dashboard</title>
   </head>
   <body>
-    <main class="page">
-      <section class="hero">
-        <div>
-          <p class="eyebrow">Local Decision Dashboard</p>
-          <h1>TQQQ / UVIX 暫定Canonical判断</h1>
-          <p class="subtitle">
-            最新データを取得し、Open時点で取るべきポジションと適用ルールを表示します。
-          </p>
-        </div>
-        <button id="refreshButton" type="button">最新判断を取得</button>
-      </section>
-
-      <section id="status" class="status">まだ取得していません。</section>
-
-      <section class="controls">
-        <label>
-          <span>現在保有</span>
-          <select id="currentPosition">
-            <option value="TQQQ" selected>TQQQ</option>
-            <option value="UVIX">UVIX</option>
-            <option value="wait_mix">TMF 50% / GLD 50%</option>
-            <option value="low_rsi_tqqq_override">低RSI override中のTQQQ</option>
-          </select>
-        </label>
-        <label>
-          <span>UVIX entry日のTQQQ Open（UVIX保有中のみ）</span>
-          <input id="uvixEntryTqqqOpen" type="number" step="0.01" placeholder="例: 72.35" />
-        </label>
-      </section>
-
-      <section id="decisionSummary" class="decision-summary">
-        <p class="summary-label">結論</p>
-        <div class="summary-main">最新判断を取得してください</div>
-        <div class="summary-sub">ボタンを押すと、最優先シナリオに基づく売買判断をここに表示します。</div>
-      </section>
-
-      <section class="grid">
-        <article class="card">
-          <h2>現在検出している状態</h2>
-          <dl id="stateList" class="kv"></dl>
-        </article>
-        <article class="card">
-          <h2>ルール</h2>
-          <ul id="ruleList" class="rules"></ul>
-        </article>
-      </section>
-
-      <section>
-        <h2 class="section-title">シナリオ別判断</h2>
-        <div id="scenarioList" class="scenarios"></div>
-      </section>
-
-      <section class="note">
-        <h2>実運用時の読み方</h2>
-        <p>
-          米国市場Open直前は「前日Close据え置き」「SPY premarket/last示唆」「S&amp;P futures示唆」を見て、
-          Open後は「市場Open後の実Open」が出ていればそれを優先します。
-        </p>
-        <p>
-          表示はこのリポジトリ上の戦略出力であり、投資助言ではありません。
-        </p>
-      </section>
-    </main>
-    <script src="/app.js"></script>
+    <p><a href="/canonical-chart.html">Canonical chart を開く</a></p>
   </body>
 </html>

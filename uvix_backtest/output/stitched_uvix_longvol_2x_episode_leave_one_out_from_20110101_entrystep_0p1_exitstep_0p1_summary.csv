@@ -1,2 +1,2 @@
-dataset,full_sample_best_entry,full_sample_best_exit,episode_count,same_as_full_optimum_count,same_as_full_optimum_share,distinct_leave_one_out_optima,mode_best_entry,mode_best_exit,mode_count
-stitched_uvix_longvol_2x,69.4,66.5,79,62,0.7848101265822784,5,69.4,66.5,62
+dataset,execution_timing,full_sample_best_entry,full_sample_best_exit,episode_count,same_as_full_optimum_count,same_as_full_optimum_share,distinct_leave_one_out_optima,mode_best_entry,mode_best_exit,mode_count
+stitched_uvix_longvol_2x,near_close,69.4,66.5,79,62,0.7848101265822784,5,69.4,66.5,62

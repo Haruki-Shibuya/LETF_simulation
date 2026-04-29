@@ -34,7 +34,6 @@
     return {
       dates: sliceArray(data.dates, i0, i1),
       gspc_close: sliceArray(data.gspc_close, i0, i1),
-      gspc_rsi_episode_rel: sliceArray(data.gspc_rsi_episode_rel, i0, i1),
       uvix_close: sliceArray(data.uvix_close, i0, i1),
       rsi: sliceArray(data.rsi, i0, i1),
       bb20_z: data.bb20_z ? sliceArray(data.bb20_z, i0, i1) : null,
@@ -172,7 +171,7 @@
     }
 
     var paneLabels = [
-      { y: mid(d1), text: "GSPC÷entry" },
+      { y: mid(d1), text: "GSPC close÷entry" },
       { y: mid(d2), text: "UVIX÷entry" },
       { y: mid(d3), text: "RSI14" },
     ];
@@ -291,59 +290,29 @@
     };
   }
 
-  function gspcRsiEpisodeRel(rsi, uvixHold) {
+  function episodeRel(values, uvixHold) {
     const out = [];
-    let entryR = null;
+    let entryValue = null;
     for (let i = 0; i < uvixHold.length; i++) {
       const hold = !!uvixHold[i];
       if (!hold) {
         out.push(null);
-        entryR = null;
+        entryValue = null;
         continue;
       }
       const prevHold = i > 0 && !!uvixHold[i - 1];
-      var r = rsi[i];
+      var v = values[i];
       if (!prevHold) {
-        entryR = r != null ? Number(r) : null;
-        if (entryR != null && entryR > 1e-9) {
+        entryValue = v != null ? Number(v) : null;
+        if (entryValue != null && entryValue > 1e-15) {
           out.push(1);
         } else {
           out.push(null);
         }
         continue;
       }
-      if (entryR != null && entryR > 1e-9 && r != null && Number(r) === Number(r)) {
-        out.push(Number(r) / entryR);
-      } else {
-        out.push(null);
-      }
-    }
-    return out;
-  }
-
-  function uvixEpisodeRel(uvixClose, uvixHold) {
-    const out = [];
-    let entryPx = null;
-    for (let i = 0; i < uvixHold.length; i++) {
-      const hold = !!uvixHold[i];
-      if (!hold) {
-        out.push(null);
-        entryPx = null;
-        continue;
-      }
-      const prevHold = i > 0 && !!uvixHold[i - 1];
-      if (!prevHold) {
-        entryPx = uvixClose[i];
-        if (entryPx != null && Number(entryPx) > 1e-15) {
-          out.push(1);
-        } else {
-          out.push(null);
-        }
-        continue;
-      }
-      var px = uvixClose[i];
-      if (entryPx != null && Number(entryPx) > 1e-15 && px != null && Number(px) === Number(px)) {
-        out.push(px / entryPx);
+      if (entryValue != null && entryValue > 1e-15 && v != null && Number(v) === Number(v)) {
+        out.push(Number(v) / entryValue);
       } else {
         out.push(null);
       }
@@ -367,13 +336,15 @@
     const uvixHold = data.uvix_hold || [];
 
     var gspcY =
-      Array.isArray(data.gspc_rsi_episode_rel) && data.gspc_rsi_episode_rel.length === nx
-        ? data.gspc_rsi_episode_rel
-        : gspcRsiEpisodeRel(data.rsi || [], uvixHold);
+      uvixHold.length === nx && data.gspc_close && data.gspc_close.length === nx
+        ? episodeRel(data.gspc_close, uvixHold)
+        : data.gspc_close
+          ? data.gspc_close.slice()
+          : [];
 
     var uvixY;
     if (uvixHold.length === nx && data.uvix_close && data.uvix_close.length === nx) {
-      uvixY = uvixEpisodeRel(data.uvix_close, uvixHold);
+      uvixY = episodeRel(data.uvix_close, uvixHold);
     } else if (data.uvix_close && data.uvix_close.length === nx) {
       uvixY = data.uvix_close.slice();
     } else {
@@ -419,7 +390,7 @@
       scatterTrace({
         type: "scatter",
         mode: modeLines,
-        name: "GSPC RSI（エントリー=1）",
+        name: "GSPC close（エントリー=1）",
         x: xPlot,
         y: gspcY,
         connectgaps: false,
@@ -427,7 +398,7 @@
         _marker: mkCol("#0d47a1"),
         yaxis: "y",
         xaxis: "x",
-        hovertemplate: "%{x}<br>GSPC RSI rel %{y:.4f}<extra></extra>",
+        hovertemplate: "%{x}<br>GSPC close rel: %{y:.4f}<extra></extra>",
       }),
       scatterTrace({
         type: "scatter",

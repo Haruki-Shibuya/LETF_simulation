@@ -1,0 +1,2 @@
+cagr,annualized_vol,max_drawdown,final_multiple,start,uvix_entry_rsi,uvix_exit_rsi,entry_filter,min_gspc_sma160_ratio_pct,uvix_entries,uvix_exits,uvix_day_share,skipped_uvix_entry_days,low_rsi_entries,low_rsi_exits
+1.0742872330811042,0.6400924870991686,-0.6297358453228314,130745.48806688824,2010-02-12,69.5,68.5,gspc_sma160_ratio_min,0.5,127,126,0.08847382649299582,1,11,11

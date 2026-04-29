@@ -1,0 +1,2 @@
+cagr,annualized_vol,max_drawdown,final_multiple,start,alpha_tqqq_drawdown_pct,beta_soxl_drawdown_pct,soxl_exit_rule,soxl_entries,soxl_exits,soxl_days,soxl_day_share,uvix_entries,uvix_exits,low_rsi_entries,low_rsi_exits
+1.1416853004708782,0.64851407784359,-0.6232429364662542,219105.775130722,2010-02-12,54.5,81.0,hold_until_gspc_open_above_prev_close_sma200,2,2,46,0.011304988940771688,127,126,11,11

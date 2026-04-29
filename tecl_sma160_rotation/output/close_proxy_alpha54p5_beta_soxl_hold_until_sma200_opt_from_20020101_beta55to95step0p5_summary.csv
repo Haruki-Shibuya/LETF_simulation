@@ -1,0 +1,2 @@
+cagr,annualized_vol,max_drawdown,final_multiple,start,alpha_tqqq_drawdown_pct,beta_soxl_drawdown_pct,soxl_exit_rule,soxl_entries,soxl_exits,soxl_days,soxl_day_share
+0.6305555282143442,0.5865284792915761,-0.6683530302070302,2682.537173166158,2002-01-01,54.5,81.0,close_proxy_hold_until_gspc_open_above_prev_close_sma200,2,2,46,0.011304988940771688

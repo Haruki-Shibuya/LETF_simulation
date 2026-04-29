@@ -1,6 +1,6 @@
-best_entry,best_exit,count
-69.4,66.5,62
-69.3,67.7,10
-69.4,65.4,5
-69.3,67.8,1
-69.6,67.7,1
+execution_timing,best_entry,best_exit,count
+near_close,69.4,66.5,62
+near_close,69.3,67.7,10
+near_close,69.4,65.4,5
+near_close,69.3,67.8,1
+near_close,69.6,67.7,1

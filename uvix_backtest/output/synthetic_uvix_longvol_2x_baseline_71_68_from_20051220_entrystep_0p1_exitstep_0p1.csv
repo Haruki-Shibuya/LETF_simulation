@@ -1,2 +1,2 @@
-dataset,vol_label,entry,exit,cagr,final_multiple,max_drawdown,trade_count,vol_days,start_date,end_date
-synthetic_uvix_longvol_2x,UVIX_LONGVOL_2X_SYNTH,71.0,68.0,0.8282076564922871,211427.80896640048,-0.7334224553725813,240,356,2005-12-20,2026-04-17
+dataset,vol_label,execution_timing,entry,exit,cagr,final_multiple,max_drawdown,trade_count,vol_days,start_date,end_date
+synthetic_uvix_longvol_2x,UVIX_LONGVOL_2X_SYNTH,near_close,71.0,68.0,0.8282076564922871,211427.80896640048,-0.7334224553725813,240,356,2005-12-20,2026-04-17

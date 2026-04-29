@@ -1,4 +1,4 @@
-dataset,vol_label,start_date,end_date,days,best_entry,best_exit,best_cagr,best_final_multiple,best_max_drawdown,best_trade_count,best_vol_days
-strict_uvix,UVIX,2022-03-30,2026-04-17,1016,66.1,61.2,0.7640950821804664,9.959485065144106,-0.5022084955882645,73,221
-synthetic_uvix_longvol_2x,UVIX_LONGVOL_2X_SYNTH,2011-01-03,2026-04-17,3845,69.4,66.5,1.1217691689302538,98564.04243502124,-0.7276570817687837,232,411
-stitched_uvix_longvol_2x,UVIX_LONGVOL_2X_STITCHED,2011-01-03,2026-04-17,3845,69.4,66.5,1.1065875591998942,88317.9737675917,-0.7299946708586118,232,411
+dataset,vol_label,execution_timing,start_date,end_date,days,best_entry,best_exit,best_cagr,best_final_multiple,best_max_drawdown,best_trade_count,best_vol_days
+strict_uvix,UVIX,near_close,2022-03-30,2026-04-17,1016,66.1,61.2,0.7640952972931181,9.959489982808414,-0.5022082886979566,73,221
+synthetic_uvix_longvol_2x,UVIX_LONGVOL_2X_SYNTH,near_close,2011-01-03,2026-04-17,3845,69.4,66.5,1.1217690957605742,98563.9904798449,-0.7276570248419358,232,411
+stitched_uvix_longvol_2x,UVIX_LONGVOL_2X_STITCHED,near_close,2011-01-03,2026-04-17,3845,69.4,66.5,1.1065874865537553,88317.92721333327,-0.729994614420382,232,411
