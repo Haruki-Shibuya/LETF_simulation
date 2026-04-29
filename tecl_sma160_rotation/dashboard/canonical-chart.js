@@ -12,6 +12,7 @@
   const metricExitRsi = document.getElementById("metricExitRsi");
   const metricGspcReturn = document.getElementById("metricGspcReturn");
   const metricUvixReturn = document.getElementById("metricUvixReturn");
+  const metricExitReason = document.getElementById("metricExitReason");
   const metricEpisode = document.getElementById("metricEpisode");
 
   let fullData = null;
@@ -39,8 +40,8 @@
   function slicePayload(data, i0, i1) {
     return {
       dates: sliceArray(data.dates, i0, i1),
-      gspc_close: sliceArray(data.gspc_close, i0, i1),
-      uvix_close: sliceArray(data.uvix_close, i0, i1),
+      gspc_price: sliceArray(data.gspc_price || data.gspc_close, i0, i1),
+      uvix_price: sliceArray(data.uvix_price || data.uvix_close, i0, i1),
       rsi: sliceArray(data.rsi, i0, i1),
       bb20_z: data.bb20_z ? sliceArray(data.bb20_z, i0, i1) : null,
       uvix_hold: sliceArray(data.uvix_hold, i0, i1),
@@ -391,18 +392,15 @@
     const xPlot = singlePad ? xWide : x;
     const uvixHold = data.uvix_hold || [];
 
-    var gspcY =
-      uvixHold.length === nx && data.gspc_close && data.gspc_close.length === nx
-        ? episodeRel(data.gspc_close, uvixHold)
-        : data.gspc_close
-          ? data.gspc_close.slice()
-          : [];
+    var gspcValues = data.gspc_price || data.gspc_close || [];
+    var uvixValues = data.uvix_price || data.uvix_close || [];
+    var allInEpisode = new Array(nx).fill(true);
+
+    var gspcY = gspcValues.length === nx ? episodeRel(gspcValues, allInEpisode) : gspcValues.slice();
 
     var uvixY;
-    if (uvixHold.length === nx && data.uvix_close && data.uvix_close.length === nx) {
-      uvixY = episodeRel(data.uvix_close, uvixHold);
-    } else if (data.uvix_close && data.uvix_close.length === nx) {
-      uvixY = data.uvix_close.slice();
+    if (uvixValues.length === nx) {
+      uvixY = episodeRel(uvixValues, allInEpisode);
     } else {
       uvixY = [];
     }
@@ -446,7 +444,7 @@
       scatterTrace({
         type: "scatter",
         mode: modeLines,
-        name: "GSPC close（エントリー=1）",
+        name: "GSPC open（エントリー=1）",
         x: xPlot,
         y: gspcY,
         connectgaps: false,
@@ -454,12 +452,12 @@
         _marker: mkCol("#0d47a1"),
         yaxis: "y",
         xaxis: "x",
-        hovertemplate: "%{x}<br>GSPC close rel: %{y:.4f}<extra></extra>",
+        hovertemplate: "%{x}<br>GSPC open rel: %{y:.4f}<extra></extra>",
       }),
       scatterTrace({
         type: "scatter",
         mode: modeLines,
-        name: "UVIX（エントリー=1）",
+        name: "UVIX open（エントリー=1）",
         x: xPlot,
         y: uvixY,
         connectgaps: false,
@@ -467,7 +465,7 @@
         _marker: mkCol("#1b5e20"),
         yaxis: "y2",
         xaxis: "x",
-        hovertemplate: "%{x}<br>UVIX rel: %{y:.4f}<extra></extra>",
+        hovertemplate: "%{x}<br>UVIX open rel: %{y:.4f}<extra></extra>",
       }),
       scatterTrace({
         type: "scatter",
@@ -521,6 +519,7 @@
     if (metricDays) metricDays.textContent = (span.days || 0) + "営業日";
     if (metricEntryRsi) metricEntryRsi.textContent = fmtNum(span.entry_rsi, 2);
     if (metricExitRsi) metricExitRsi.textContent = fmtNum(span.exit_rsi, 2);
+    if (metricExitReason) metricExitReason.textContent = span.exit_reason || "-";
     if (metricEpisode) metricEpisode.textContent = (epIdx + 1) + " / " + epCount;
     setReturnMetric(metricGspcReturn, span.gspc_return);
     setReturnMetric(metricUvixReturn, span.uvix_return);

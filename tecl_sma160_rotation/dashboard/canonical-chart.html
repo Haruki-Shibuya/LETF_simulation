@@ -263,7 +263,7 @@
       }
       .metric-grid {
         display: grid;
-        grid-template-columns: repeat(6, minmax(120px, 1fr));
+        grid-template-columns: repeat(7, minmax(112px, 1fr));
         gap: 8px;
         margin: 0 0 12px;
       }
@@ -353,12 +353,12 @@
           <p class="eyebrow">Canonical UVIX Episodes</p>
           <h1>GSPC・UVIX・RSI エピソードビュー</h1>
           <p class="context-copy">
-            UVIXエントリーごとに切り出し、GSPC close と UVIX close はエントリー時点を 1.000 として相対化。RSI14 は実値で表示。
+            UVIXエントリーからエグジット判定日までを切り出し、GSPC open と UVIX open はエントリーOpenを 1.000 として相対化。RSI14 は実値で表示。
           </p>
         </div>
         <div class="legend-strip" aria-label="系列">
-          <span class="legend-pill"><i class="legend-dot gspc"></i>GSPC close / entry</span>
-          <span class="legend-pill"><i class="legend-dot uvix"></i>UVIX close / entry</span>
+          <span class="legend-pill"><i class="legend-dot gspc"></i>GSPC open / entry</span>
+          <span class="legend-pill"><i class="legend-dot uvix"></i>UVIX open / entry</span>
           <span class="legend-pill"><i class="legend-dot rsi"></i>RSI14</span>
         </div>
       </header>
@@ -379,6 +379,7 @@
         <div class="metric"><span>Exit RSI</span><strong id="metricExitRsi">-</strong></div>
         <div class="metric"><span>GSPC return</span><strong id="metricGspcReturn">-</strong></div>
         <div class="metric"><span>UVIX return</span><strong id="metricUvixReturn">-</strong></div>
+        <div class="metric"><span>Exit reason</span><strong id="metricExitReason">-</strong></div>
         <div class="metric"><span>Episode</span><strong id="metricEpisode">-</strong></div>
       </section>
       <div id="chartError"></div>
