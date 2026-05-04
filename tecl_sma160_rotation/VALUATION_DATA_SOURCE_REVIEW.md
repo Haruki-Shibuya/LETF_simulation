@@ -174,3 +174,95 @@ For canonical-grade testing:
 - Use S&P DJI official workbook for S&P 500 if accessible.
 - Use Nasdaq/FactSet/Bloomberg/GIW/GIDS data for Nasdaq-100 if accessible.
 - If official Nasdaq data remains unavailable, prefer treating Nasdaq-100 valuation filters as exploratory only.
+
+---
+
+## Daily Forward P/E Construction (yfinance × monthly EPS)
+
+### Output file
+
+`output/valuation_forward_pe_daily.csv` — 5,115 rows, 2006-01-03 to 2026-05-04.
+
+Fields: `date`, `sp500_forward_pe`, `qqq_forward_pe`.
+
+Script: `build_daily_forward_pe.py`.
+
+### Methodology
+
+**Core insight**: The 12-month forward consensus EPS is updated approximately monthly (by data providers like Doinoff, Trendonify, FactSet). The index price changes every trading day. Therefore:
+
+```
+daily_forward_pe(day D) = price(D) / forward_EPS(last known)
+```
+
+Where `forward_EPS` is treated as constant between monthly updates, and changes only when the consensus is revised.
+
+**Step-by-step**:
+
+1. Load monthly P/E source (`valuation_forward_pe_2005_sim_daily_ffill.csv`).
+   - Each row has: `sp500_forward_pe` (monthly consensus) and `sp500_level` (index level at time of P/E calculation).
+2. Derive implied forward EPS per month:
+   ```
+   forward_EPS_month_M = sp500_level_M / sp500_forward_pe_M
+   ```
+3. **Shift EPS by 1 month** to eliminate look-ahead bias:
+   - Month M's EPS is known only at the END of month M.
+   - Therefore, all trading days in month M+1 use EPS from month M.
+   - This is the standard convention used by professional services: "as of end of month M" data is used beginning the first trading day of month M+1.
+4. Download daily prices for `^GSPC` (S&P 500) and `QQQ` (Nasdaq-100 proxy) via `yfinance`.
+5. For each trading day D in month M+1:
+   ```
+   sp500_forward_pe(D) = price_GSPC(D) / forward_EPS_M
+   qqq_forward_pe(D)   = price_QQQ(D)  / qqq_forward_EPS_M
+   ```
+
+### What happens between monthly updates
+
+Between consecutive monthly EPS updates, the EPS component is **held constant**. The daily forward P/E changes only because the price changes. This is correct behavior and reflects what an investor would have observed in real time: the best available EPS estimate on any given day is the most recently published consensus figure.
+
+Concretely, if the December consensus EPS is 88.2 for the S&P 500:
+- All January trading days divide that day's closing price by 88.2.
+- If the index rises 2% in January, the forward P/E rises by 2%.
+- The EPS component updates only at the beginning of February (when January's consensus is applied).
+
+This differs from forward-filling the P/E ratio itself (which would artificially freeze both price and EPS). Here only the EPS is frozen; the price is live.
+
+### Timing convention: which day does the EPS apply?
+
+The 1-month shift means:
+- **December** EPS estimate → applied to all **January** trading days.
+- **January** EPS estimate → applied to all **February** trading days.
+- And so on.
+
+In practice, the consensus EPS for month M is a blend of current-year and next-year analyst estimates:
+```
+forward_EPS_M = (months_remaining_in_year / 12) × CY_estimate + (1 − months_remaining / 12) × NY_estimate
+```
+This blend shifts mechanically each month. Using the prior-month value eliminates look-ahead bias from both the EPS level and the blend ratio.
+
+### Look-ahead bias in the earlier monthly-ffill approach
+
+The previous `valuation_forward_pe_2005_sim_daily_ffill.csv` was forward-filled without a monthly shift:
+- January 2020's P/E was applied from January 1, 2020.
+- But the January consensus wasn't known until January 31.
+- This introduced ~30 days of look-ahead bias.
+
+The new daily file corrects this.
+
+### Coverage limits
+
+| Series | Coverage | Bottleneck |
+|---|---|---|
+| S&P 500 daily forward P/E | 2006-01 onward | Monthly source starts 2005-12 |
+| QQQ daily forward P/E | 2006-01 onward | Monthly source starts 2005-12 (QQQ launched 1999-03) |
+| S&P 500 back to 1991 | **Possible** via Doinoff 1982+ monthly data + yfinance ^GSPC | Extend `build_daily_forward_pe.py` with Doinoff CSV |
+| QQQ back to 1991 | **Not possible** — QQQ launched 1999-03-10; NDX forward P/E history before 2005 unavailable for free | — |
+| Strategy backtest back to 1991 | **Not feasible** — TQQQ launched 2010-02, UVIX launched 2022-03 | — |
+
+To extend S&P 500 forward P/E back to 1982 using Doinoff data, load `output/valuation_sp500_forward_pe_doinoff_monthly.csv` as the monthly source instead of the current sim file, and pair with `yfinance` ^GSPC prices.
+
+### Refinitiv / LSEG Eikon API
+
+A Refinitiv API key (App Key) is stored in `../.env` as `REFINITIV_APP_KEY`. The key was generated from the App Key Generator app (type `APPKEYG` in the Workspace toolbar). The fetch script is `fetch_refinitiv_forward_pe.py`.
+
+**Finding**: The JHU academic subscription does not include S&P 500 or Nasdaq-100 **index-level** fundamental data. Individual equity forward P/E (e.g., `AAPL.O` with `TR.FWDPE`) works correctly. Index RICs (`.SPX`, `.NDX`) return permission errors. ETF RICs (`SPY`, `QQQ`) resolve but return null for all fundamental fields. The yfinance-based construction above is the current practical alternative.
