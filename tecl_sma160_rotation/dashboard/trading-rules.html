@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Canonical Trading Rules</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="workspace-header">
+        <div>
+          <p class="eyebrow">Canonical Strategy</p>
+          <h1>Trading Rules</h1>
+          <p class="context-copy">
+            UVIX Episodesで使っている2005-12-20開始canonicalの売買仕様。後から見ても、どの条件で何をしているかを確認できるように記録する。
+          </p>
+        </div>
+        <nav class="top-nav" aria-label="Dashboard navigation">
+          <a class="nav-link" href="index.html">Position</a>
+          <a class="nav-link" href="canonical-chart.html">UVIX Episodes</a>
+          <a class="nav-link active" href="trading-rules.html">Trading Rules</a>
+        </nav>
+      </header>
+
+      <section class="mode-bar" aria-label="開始日">
+        <a class="nav-link active" href="trading-rules.html?start=2005">2005開始</a>
+        <a class="nav-link" href="trading-rules.html?start=2010">2010開始</a>
+        <span class="refresh-status">Position / UVIX Episodesでは同じ開始日をボタンで切り替え可能。</span>
+      </section>
+
+      <section class="decision-summary">
+        <p class="summary-label">Current canonical</p>
+        <div class="summary-main">当日始値を参照し、同じ始値で1回だけ取引</div>
+        <p class="summary-sub">
+          現canonicalは、前日終値だけで判断する方式ではない。GSPC/TQQQの当日始値を判断入力に使い、その同じ当日始値で乗り換えた前提で検証している。
+          前日終値から当日始値までのリターンは前日から持っていたポジションで受け、当日始値から終値までのリターンは乗り換え後のポジションで受ける。
+        </p>
+      </section>
+
+      <section class="layout-grid">
+        <article class="panel wide">
+          <div class="panel-head">
+            <h2>0. 用語</h2>
+          </div>
+          <dl class="kv">
+            <dt>始値</dt>
+            <dd>米国市場の通常取引開始時の始値。現canonicalでは、この始値を判断入力にも取引価格にも使う。</dd>
+            <dt>終値</dt>
+            <dd>米国市場の通常取引終了時の終値。翌日の始値まで持ち越すポジションの基準になる。</dd>
+            <dt>Implied RSI (14)</dt>
+            <dd>GSPCの始値時点の仮RSI。前日までのGSPC終値に当日のGSPC始値を1点追加してWilder RSI (14)を計算する。</dd>
+            <dt>BB20 Z</dt>
+            <dd>直近20営業日のGSPC終値に対して、当日のGSPC始値が平均から何標準偏差上にあるかを表す値。</dd>
+            <dt>SMA160</dt>
+            <dd>GSPCの160営業日移動平均。ベース戦略でリスクオンか安全資産かを分ける基準。</dd>
+            <dt>直前ピーク基準ドローダウン α%</dt>
+            <dd>TQQQ始値が、GSPCがSMA160を下回る直前のTQQQピークから何%下落しているかを表す値。局面ごとに直前ピークを取り直す。</dd>
+            <dt>SMA160割れ時点基準の下落率 n%</dt>
+            <dd>GSPCがSMA160を下回った局面で、その局面に入った日のTQQQ始値を基準に、TQQQ始値がそこから何%下落したかを見る方式。αとは別の変数としてnを使う。</dd>
+            <dt>UVIX取引区間</dt>
+            <dd>UVIXに入った日から、UVIXを終了した日までの1回分の取引区間。</dd>
+            <dt>安全資産</dt>
+            <dd>ベース戦略がTQQQではなく、TMF 50%とGLD 50%で待機する状態。</dd>
+            <dt>最優先</dt>
+            <dd>通常ルールより優先して一時的に別ポジションを持つ例外ルール。</dd>
+            <dt>合成系列</dt>
+            <dd>実物データが存在しない期間を、関連する実データから合成した代替系列。</dd>
+          </dl>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>1. 取引タイミング</h2>
+          </div>
+          <ul class="rule-list">
+            <li>売買判断は各営業日の始値でのみ行う。日中の価格変動では売買しない。</li>
+            <li>現canonicalでは、当日始値を見て、その同じ始値で乗り換えたものとして検証している。前日終値だけで判断して翌営業日始値で売買する版ではない。</li>
+            <li>1つの始値で実行できる乗り換えは1回だけ。同じ始値で「UVIXを売って、またUVIXに入り直す」ことはしない。</li>
+            <li>前日から高RSI UVIX最優先ポジションを持っている場合は、まず高RSI UVIX終了条件だけを見る。終了した日は基本ポジションへ戻り、その日の高RSI UVIX最優先ルールの新規発動は行わない。</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>2. 基本ポジション</h2>
+          </div>
+          <ul class="rule-list">
+            <li>GSPCがSMA160以上にある通常局面では、TQQQを基本ポジションとする。</li>
+            <li>GSPCがSMA160を下回った直後は、TQQQをいったん持たず、安全資産としてTMF 50% / GLD 50%を持つ。</li>
+            <li>安全資産中に、TQQQ始値が直前ピークからα%以上下落したらTQQQを拾う。この後は、GSPCがSMA160を回復するまでTQQQを基本ポジションにする。</li>
+            <li>現在の直前ピーク基準canonicalでは、2005開始は最適α = 94.0%、CAGR 113.02%、最大DD -69.63%。2010開始は最適α = 40.5%、CAGR 153.45%、最大DD -77.76%。</li>
+            <li>注意: 「SMA160割れ時点のTQQQ始値からの下落率」でTQQQを拾う方式は別候補であり、その変数はαではなくnとして扱う。</li>
+            <li>このcanonicalでは、高RSI UVIX最優先ルールが基本ポジションより優先される。</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>3. 指標の計算</h2>
+          </div>
+          <ul class="rule-list">
+            <li>Implied RSI (14)はGSPCを使う。前日までのGSPC終値列に、当日のGSPC始値を仮の最新値として加えてWilder RSI (14)を計算する。</li>
+            <li>BB20 ZもGSPCを使う。直近20営業日のGSPC終値の平均・標準偏差に対して、当日のGSPC始値がどれだけ上振れているかを見る。</li>
+            <li>SMA160判定と直前ピーク基準ドローダウンα%も、当日のGSPC始値/TQQQ始値を参照して判定する。</li>
+            <li>高RSI UVIX最優先ルールの発動・終了価格はUVIX始値。GSPCとUVIXのグラフは、各取引区間の発動日始値を1.000として相対化する。</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>4. 高RSI UVIX最優先ルール</h2>
+          </div>
+          <ul class="rule-list">
+            <li>高RSI UVIX最優先ポジションを持っていない日に、Implied RSI (14)が67.5以上なら候補日とする。</li>
+            <li>同時にGSPC BB20 Zが1.6以上であれば、基本ポジションより優先してUVIXへ乗り換える。</li>
+            <li>Implied RSI (14)条件だけを満たしても、BB20 Zが1.6未満なら高RSI UVIX最優先ルールは発動しない。</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>5. 高RSI UVIX終了条件</h2>
+          </div>
+          <ul class="rule-list">
+            <li>高RSI UVIX最優先ポジション保有中に、Implied RSI (14)が66.0以下になったらUVIXを終了する。</li>
+            <li>または、当日のGSPC始値が高RSI UVIX発動日のGSPC始値 +0.1%以下になったらUVIXを終了する。これはTQQQではなくGSPC基準の早期終了ルール。</li>
+            <li>GSPC基準の早期終了は、「高RSI UVIX最優先ルールが発動したあと、GSPCがさらに上に走れず、発動時点近辺まで失速したらUVIXを長く持たず閉じる」という意味の条件。GSPCが下がるほどUVIXには追い風になりやすいため、実質的には利益確定寄りの手仕舞い条件として働く。</li>
+            <li>γ = +0.1%なので、高RSI UVIX発動日のGSPC始値を100とした場合、当日以降のGSPC始値が100.1以下ならこの条件に該当する。</li>
+            <li>このcanonicalではTQQQ始値による下落終了ルールは使わない。UVIX自体の損切り・利確ラインも使わない。</li>
+          </ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>6. 低RSI TQQQ最優先ルール</h2>
+          </div>
+          <ul class="rule-list">
+            <li>ベース戦略が「待機状態」で、かつUVIXを持っていない日に、Implied RSI (14)が30.0未満ならTQQQへ乗り換える。</li>
+            <li>この低RSI TQQQ最優先ポジション中にImplied RSI (14)が32.5以上へ戻ったら終了し、その日の基本ポジションへ戻る。</li>
+            <li>このルールは安全資産中の急落後反発を取りに行く例外処理であり、高RSI UVIX最優先ルールとは別物。高RSI UVIX最優先ポジション保有中は高RSI UVIX終了条件を優先する。</li>
+          </ul>
+        </article>
+
+        <article class="panel wide">
+          <div class="panel-head">
+            <h2>7. 判断時点比較</h2>
+          </div>
+          <ul class="rule-list">
+            <li>2010開始canonicalの固定パラメータで、当日始値参照版と前日終値参照版を比較した。</li>
+            <li>当日始値参照・同じ当日始値で取引: CAGR 153.45%、最大DD -77.76%、高RSI UVIX発動142回、低RSI TQQQ最優先ルール発動16回。</li>
+            <li>前日終値参照・翌営業日始値で取引: CAGR 108.40%、最大DD -77.84%、高RSI UVIX発動155回、低RSI TQQQ最優先ルール発動21回。</li>
+            <li>この検証では、当日始値参照の方がCAGRで約45.05ポイント高かった。そのため現canonicalは当日始値参照を採用している。</li>
+            <li>注意: 当日始値参照は、始値を判断入力に使い、その同じ始値で乗り換えるという強い仮定を置いている。実売買では寄り付き時点でのデータ取得・約定可能性・スリッページを別途確認する必要がある。</li>
+          </ul>
+        </article>
+
+        <article class="panel wide">
+          <div class="panel-head">
+            <h2>8. データと検証範囲</h2>
+          </div>
+          <ul class="rule-list">
+            <li>UVIX Episodesサイトは、2005-12-20開始版と2010-02-12開始版を切り替えて表示できる。</li>
+            <li>2022-03-30以前のUVIXは実物データではなく、LONGVOL由来の合成UVIX系列。2022-03-31以降は実物UVIX。</li>
+            <li>2010-02-12以前のTQQQは実物データではなく、QQQ由来の合成TQQQ backtest。2010-02-12以降は実物TQQQ。</li>
+            <li>2005開始・直前ピーク基準ドローダウンα再最適化版のsummary: α = 94.0%、CAGR 113.02%、最大DD -69.63%、高RSI UVIX発動160回、低RSI TQQQ最優先ルール発動32回。</li>
+            <li>2010開始・直前ピーク基準ドローダウンα再最適化版のsummary: α = 40.5%、CAGR 153.45%、最大DD -77.76%、高RSI UVIX発動142回、低RSI TQQQ最優先ルール発動16回。</li>
+            <li>このルールは研究・検証用のカノニカル仕様であり、実売買ではデータ更新時刻、約定価格、スリッページ、税金、手数料を別途見る必要がある。</li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

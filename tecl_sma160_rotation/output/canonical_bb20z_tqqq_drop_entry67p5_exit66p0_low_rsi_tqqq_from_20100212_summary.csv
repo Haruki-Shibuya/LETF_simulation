@@ -1,0 +1,2 @@
+cagr,annualized_vol,max_drawdown,final_multiple,start,uvix_entry_rsi,uvix_entry_min_bb_z,uvix_exit_rsi,uvix_tqqq_drop_exit_pct,low_rsi_entry,low_rsi_exit,uvix_entries,uvix_exits,uvix_drop_exit_only,uvix_rsi_exit_only,uvix_both_exit,low_rsi_entries,low_rsi_exits,skipped_uvix_entry_days,uvix_day_share,low_rsi_day_share,transition_policy
+1.483384441486339,0.6482443106450424,-0.6480331659226795,2391694.9156485647,2010-02-12,67.5,1.6,66.0,0.0,30.0,32.5,141,140,69,28,43,11,11,114,0.10027033669206194,0.005898255099533055,one_open_transition_per_day

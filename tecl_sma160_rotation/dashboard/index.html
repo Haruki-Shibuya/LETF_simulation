@@ -3,10 +3,76 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta http-equiv="refresh" content="0; url=/canonical-chart.html" />
-    <title>LETF Simulation Dashboard</title>
+    <title>Canonical Position Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <p><a href="/canonical-chart.html">Canonical chart を開く</a></p>
+    <main class="page">
+      <header class="workspace-header">
+        <div>
+          <p class="eyebrow">Canonical Strategy</p>
+          <h1>現在ポジション判定</h1>
+          <p class="context-copy">
+            通常時間はカノニカルCSVの最終行、NY pre-market中はSPY pre-marketから推定したGSPC入力値を基準に、次に持つべきポジションと発動中のルールを表示します。
+          </p>
+        </div>
+        <nav class="top-nav" aria-label="Dashboard navigation">
+          <a class="nav-link active" href="index.html">Position</a>
+          <a class="nav-link" href="canonical-chart.html">UVIX Episodes</a>
+          <a class="nav-link" href="trading-rules.html">Trading Rules</a>
+        </nav>
+      </header>
+
+      <section class="mode-bar" aria-label="判定モード">
+        <button type="button" class="start-button" data-start="2005">2005開始</button>
+        <button type="button" class="start-button" data-start="2010">2010開始</button>
+        <span class="mode-separator" aria-hidden="true"></span>
+        <button type="button" class="mode-button" data-mode="latest">最新情報で判断</button>
+        <button type="button" class="mode-button" data-mode="previous_close">前日終値で判断</button>
+        <button type="button" class="mode-button" data-mode="premarket">pre-marketで判断</button>
+        <button type="button" class="mode-button" data-mode="today_open">本日始値で判断</button>
+        <span id="refreshStatus" class="refresh-status"></span>
+      </section>
+
+      <section id="decisionSummary" class="decision-summary" aria-live="polite"></section>
+
+      <section class="metric-grid" aria-label="Latest canonical state">
+        <div class="metric"><span>データ時刻 JST</span><strong id="metricDate">-</strong></div>
+        <div class="metric"><span>Position</span><strong id="metricPosition">-</strong></div>
+        <div class="metric"><span>データソース</span><strong id="metricSource">-</strong></div>
+        <div class="metric"><span>Implied RSI (14)</span><strong id="metricRsi">-</strong></div>
+        <div class="metric"><span>BB20 Z</span><strong id="metricBbz">-</strong></div>
+        <div class="metric"><span>GSPC入力値</span><strong id="metricGspc">-</strong></div>
+        <div class="metric"><span>TQQQ入力値</span><strong id="metricTqqq">-</strong></div>
+        <div class="metric"><span>Equity multiple</span><strong id="metricEquity">-</strong></div>
+      </section>
+
+      <section class="layout-grid">
+        <article class="panel">
+          <div class="panel-head">
+            <h2>判定根拠</h2>
+          </div>
+          <ul id="reasonList" class="reason-list"></ul>
+        </article>
+
+        <article class="panel">
+          <div class="panel-head">
+            <h2>発動中エピソード</h2>
+          </div>
+          <dl id="entryList" class="kv"></dl>
+        </article>
+
+        <article class="panel wide">
+          <div class="panel-head">
+            <h2>カノニカル条件</h2>
+            <a class="text-link" href="../CANONICAL_UVIX_STRATEGY_NOTES.md">strategy notes</a>
+          </div>
+          <ul id="ruleList" class="rule-list"></ul>
+        </article>
+      </section>
+    </main>
+
+    <script id="__positionEmbed" type="application/json">{"selected_variant":"2005","available_variants":{"2005":{"label":"2005-12-20開始","start":"2005-12-20"},"2010":{"label":"2010-02-12開始","start":"2010-02-12"}},"variants":{"2005":{"title":"Canonical position dashboard","variant":"2005","variant_label":"2005-12-20開始","available_variants":{"2005":{"label":"2005-12-20開始","start":"2005-12-20"},"2010":{"label":"2010-02-12開始","start":"2010-02-12"}},"generated_from":"tecl_sma160_rotation/output/canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20051220_daily_path.csv","source":{"generated_at_jst":"2026-05-04 22:07 JST","market_time_et":"2026-05-04 09:07 ET","market_phase":"premarket","mode":"live_premarket_proxy","selected_mode":"latest","label":"SPY pre-marketから推定","source_time_jst":"2026-05-04 22:07 JST","notes":["GSPC入力値は、SPY pre-market価格の前日終値比から推定しています。","Implied RSI (14) と BB20 Z は、前日までのGSPC終値に推定GSPC入力値を1点追加して再計算しています。"],"source_date":"2026-05-04","gspc_open":7220.327180700192,"tqqq_open":65.37,"rsi":71.83882765735265,"bb20_z":1.4019305783373848},"modes":{"selected":"latest","availability":{"latest":true,"previous_close":true,"premarket":true,"today_open":false},"labels":{"latest":"最新情報で判断","previous_close":"前日終値で判断","premarket":"pre-marketで判断","today_open":"本日始値で判断"}},"latest":{"date":"2026-04-17","rsi":71.35358020250133,"bb20_z":2.0632302290344247,"gspc_open":7074.5498046875,"tqqq_open":57.78000609506575,"base_regime":"TQQQ","selected_leg":"UVIX","action":"","skip_reason":"","strategy_equity":4593391.712585435,"strategy_return":-0.02590675239303919},"decision_input":{"date":"2026-05-04","rsi":71.83882765735265,"bb20_z":1.4019305783373848,"gspc_open":7220.327180700192,"tqqq_open":65.37,"base_regime":"TQQQ","selected_leg":"UVIX","action":"","skip_reason":"","strategy_equity":4593391.712585435,"strategy_return":-0.02590675239303919},"previous":{"date":"2026-04-16","rsi":69.89884687411933,"bb20_z":2.2015841316104976,"gspc_open":7037.77978515625,"tqqq_open":56.13000817497095,"base_regime":"TQQQ","selected_leg":"UVIX","action":"","skip_reason":"","strategy_equity":4715556.466354681,"strategy_return":-0.001724177336719812},"active_entry":{"date":"2026-04-15","rsi":67.53406456368499,"bb20_z":2.217970044215081,"gspc_open":6978.169921875,"tqqq_open":53.57000647754739,"base_regime":"TQQQ","selected_leg":"UVIX","action":"enter_uvix_high_rsi_bb20z","skip_reason":"","strategy_equity":4723700.964503119,"strategy_return":0.030535911044382802},"decision":{"headline":"UVIXを継続保有","position":"UVIX","action":"hold_uvix","status":"active_uvix","reasons":["高RSI UVIX最優先ルールは 2026-04-15 に発動しています。","Implied RSI (14)終了条件は未達: 71.84 > 66。","GSPC利確終了条件は未達: 始値 7220.33 > 判定値 6985.15。"],"exit_checks":{"rsi_exit":false,"gspc_profit_exit":false,"gspc_profit_trigger":6985.148091796874}},"summary":{"cagr":1.130173760938745,"annualized_vol":0.5657832949760524,"max_drawdown":-0.6963385654929727,"final_multiple":4593391.712585435,"uvix_entries":160.0,"uvix_exits":159.0,"uvix_gspc_profit_exit_only":79.0,"uvix_rsi_exit_only":19.0,"uvix_rsi_and_gspc_profit_exit":61.0,"low_rsi_entries":32.0,"low_rsi_exits":32.0,"skipped_uvix_entry_days":132.0,"start":"2005-12-20","end":"2026-04-17","alpha_drawdown_pct":94.0,"uvix_entry_rsi":67.5,"uvix_entry_min_bb_z":1.6,"uvix_exit_rsi":66.0,"uvix_gspc_profit_exit_pct":0.1,"low_rsi_entry":30.0,"low_rsi_exit":32.5,"uvix_day_share":0.09076682316118936,"low_rsi_day_share":0.014475743348982786,"base_reentry_rule":"tqqq_open_drawdown_from_immediate_prior_peak","transition_policy":"one_open_transition_per_day"},"rules":{"取引タイミング":"現canonicalは当日始値を判断入力として使い、その同じ当日始値で1回だけ乗り換える。前日終値から当日始値までのリターンは前日から持っていたポジションで受け、当日始値から終値までのリターンは乗り換え後のポジションで受ける。","判断時点":"高RSI UVIX、低RSI TQQQ、SMA160、直前ピーク基準ドローダウンα%はいずれも当日始値参照。2010開始の固定パラメータ比較では、前日終値参照版CAGR 108.40%に対して、当日始値参照版CAGR 153.45%だった。","基本ポジション":"GSPCがSMA160以上ならTQQQ。GSPCがSMA160を下回った直後は安全資産としてTMF 50% / GLD 50%。","TQQQ再エントリー":"安全資産中にTQQQ始値が直前ピークからα%以上下落したらTQQQを拾う。この開始日版ではCAGR最大化でα = 94%。","高RSI UVIX最優先ルール":"Implied RSI (14) >= 67.5 かつ GSPC BB20 Z >= 1.6 なら、基本ポジションより優先してUVIXへ乗り換える。","高RSI UVIX終了条件":"Implied RSI (14) <= 66.0、またはGSPC始値 <= 高RSI UVIX発動時のGSPC始値 +0.1% でUVIXを終了する。","低RSI TQQQ最優先ルール":"安全資産中にImplied RSI (14) < 30.0ならTQQQへ乗り換え、32.5以上で終了する。"}},"2010":{"title":"Canonical position dashboard","variant":"2010","variant_label":"2010-02-12開始","available_variants":{"2005":{"label":"2005-12-20開始","start":"2005-12-20"},"2010":{"label":"2010-02-12開始","start":"2010-02-12"}},"generated_from":"tecl_sma160_rotation/output/canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20100212_daily_path.csv","source":{"generated_at_jst":"2026-05-04 22:07 JST","market_time_et":"2026-05-04 09:07 ET","market_phase":"premarket","mode":"live_premarket_proxy","selected_mode":"latest","label":"SPY pre-marketから推定","source_time_jst":"2026-05-04 22:07 JST","notes":["GSPC入力値は、SPY pre-market価格の前日終値比から推定しています。","Implied RSI (14) と BB20 Z は、前日までのGSPC終値に推定GSPC入力値を1点追加して再計算しています。"],"source_date":"2026-05-04","gspc_open":7220.327180700192,"tqqq_open":65.37,"rsi":71.83882765735265,"bb20_z":1.4019305783373848},"modes":{"selected":"latest","availability":{"latest":true,"previous_close":true,"premarket":true,"today_open":false},"labels":{"latest":"最新情報で判断","previous_close":"前日終値で判断","premarket":"pre-marketで判断","today_open":"本日始値で判断"}},"latest":{"date":"2026-04-17","rsi":71.35358020250133,"bb20_z":2.0632302290344247,"gspc_open":7074.5498046875,"tqqq_open":57.78000609506575,"base_regime":"TQQQ","selected_leg":"UVIX","action":"","skip_reason":"","strategy_equity":3323945.7164490693,"strategy_return":-0.02590675239303919},"decision_input":{"date":"2026-05-04","rsi":71.83882765735265,"bb20_z":1.4019305783373848,"gspc_open":7220.327180700192,"tqqq_open":65.37,"base_regime":"TQQQ","selected_leg":"UVIX","action":"","skip_reason":"","strategy_equity":3323945.7164490693,"strategy_return":-0.02590675239303919},"previous":{"date":"2026-04-16","rsi":69.89884687411933,"bb20_z":2.2015841316104976,"gspc_open":7037.77978515625,"tqqq_open":56.13000817497095,"base_regime":"TQQQ","selected_leg":"UVIX","action":"","skip_reason":"","strategy_equity":3412348.5863544927,"strategy_return":-0.001724177336719812},"active_entry":{"date":"2026-04-15","rsi":67.53406456368499,"bb20_z":2.217970044215081,"gspc_open":6978.169921875,"tqqq_open":53.57000647754739,"base_regime":"TQQQ","selected_leg":"UVIX","action":"enter_uvix_high_rsi_bb20z","skip_reason":"","strategy_equity":3418242.242159843,"strategy_return":0.030535911044382802},"decision":{"headline":"UVIXを継続保有","position":"UVIX","action":"hold_uvix","status":"active_uvix","reasons":["高RSI UVIX最優先ルールは 2026-04-15 に発動しています。","Implied RSI (14)終了条件は未達: 71.84 > 66。","GSPC利確終了条件は未達: 始値 7220.33 > 判定値 6985.15。"],"exit_checks":{"rsi_exit":false,"gspc_profit_exit":false,"gspc_profit_trigger":6985.148091796874}},"summary":{"cagr":1.5345273049459158,"annualized_vol":0.6413447715002042,"max_drawdown":-0.7776330162254856,"final_multiple":3323945.7164490693,"uvix_entries":142.0,"uvix_exits":141.0,"uvix_gspc_profit_exit_only":71.0,"uvix_rsi_exit_only":16.0,"uvix_rsi_and_gspc_profit_exit":54.0,"low_rsi_entries":16.0,"low_rsi_exits":16.0,"skipped_uvix_entry_days":119.0,"start":"2010-02-12","end":"2026-04-17","alpha_drawdown_pct":40.5,"uvix_entry_rsi":67.5,"uvix_entry_min_bb_z":1.6,"uvix_exit_rsi":66.0,"uvix_gspc_profit_exit_pct":0.1,"low_rsi_entry":30.0,"low_rsi_exit":32.5,"uvix_day_share":0.10002457606291472,"low_rsi_day_share":0.007372818874416319,"base_reentry_rule":"tqqq_open_drawdown_from_immediate_prior_peak","transition_policy":"one_open_transition_per_day"},"rules":{"取引タイミング":"現canonicalは当日始値を判断入力として使い、その同じ当日始値で1回だけ乗り換える。前日終値から当日始値までのリターンは前日から持っていたポジションで受け、当日始値から終値までのリターンは乗り換え後のポジションで受ける。","判断時点":"高RSI UVIX、低RSI TQQQ、SMA160、直前ピーク基準ドローダウンα%はいずれも当日始値参照。2010開始の固定パラメータ比較では、前日終値参照版CAGR 108.40%に対して、当日始値参照版CAGR 153.45%だった。","基本ポジション":"GSPCがSMA160以上ならTQQQ。GSPCがSMA160を下回った直後は安全資産としてTMF 50% / GLD 50%。","TQQQ再エントリー":"安全資産中にTQQQ始値が直前ピークからα%以上下落したらTQQQを拾う。この開始日版ではCAGR最大化でα = 40.5%。","高RSI UVIX最優先ルール":"Implied RSI (14) >= 67.5 かつ GSPC BB20 Z >= 1.6 なら、基本ポジションより優先してUVIXへ乗り換える。","高RSI UVIX終了条件":"Implied RSI (14) <= 66.0、またはGSPC始値 <= 高RSI UVIX発動時のGSPC始値 +0.1% でUVIXを終了する。","低RSI TQQQ最優先ルール":"安全資産中にImplied RSI (14) < 30.0ならTQQQへ乗り換え、32.5以上で終了する。"}}}}</script>
+    <script src="app.js" defer></script>
   </body>
 </html>

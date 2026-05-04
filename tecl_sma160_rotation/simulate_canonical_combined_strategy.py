@@ -29,14 +29,19 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--backtest-start", default="2010-02-12")
     parser.add_argument("--uvix-entry-rsi", type=float, default=69.5)
     parser.add_argument("--uvix-exit-rsi", type=float, default=68.5)
-    parser.add_argument("--uvix-tqqq-drop-exit-pct", type=float, default=0.0)
+    parser.add_argument(
+        "--uvix-tqqq-drop-exit-pct",
+        type=float,
+        default=None,
+        help="Optional legacy UVIX exit: exit when TQQQ open is this pct below the UVIX-entry TQQQ open.",
+    )
     parser.add_argument("--low-rsi-entry", type=float, default=30.0)
     parser.add_argument("--low-rsi-exit", type=float, default=32.5)
     parser.add_argument("--wait-tmf", type=float, default=50.0)
     parser.add_argument("--wait-gld", type=float, default=50.0)
     parser.add_argument(
         "--output-stem",
-        default="canonical_prev_close_sma_same_open_running_dd_uvix_or_tqqq_drop_low_rsi_tqqq_rsi_exit_from_20100212",
+        default="canonical_prev_close_sma_same_open_running_dd_uvix_rsi_exit_low_rsi_tqqq_rsi_exit_from_20100212",
     )
     return parser.parse_args()
 
@@ -132,6 +137,7 @@ def simulate(frame: pd.DataFrame, args: argparse.Namespace) -> tuple[dict[str, f
 
         uvix_drop_exit = (
             active_uvix
+            and args.uvix_tqqq_drop_exit_pct is not None
             and np.isfinite(uvix_entry_tqqq_open)
             and tqqq_open[i] <= uvix_entry_tqqq_open * (1.0 - args.uvix_tqqq_drop_exit_pct / 100.0)
         )
@@ -178,7 +184,9 @@ def simulate(frame: pd.DataFrame, args: argparse.Namespace) -> tuple[dict[str, f
             "start": args.backtest_start,
             "uvix_entry_rsi": float(args.uvix_entry_rsi),
             "uvix_exit_rsi": float(args.uvix_exit_rsi),
-            "uvix_tqqq_drop_exit_pct": float(args.uvix_tqqq_drop_exit_pct),
+            "uvix_tqqq_drop_exit_pct": (
+                None if args.uvix_tqqq_drop_exit_pct is None else float(args.uvix_tqqq_drop_exit_pct)
+            ),
             "low_rsi_entry": float(args.low_rsi_entry),
             "low_rsi_exit": float(args.low_rsi_exit),
             "uvix_entries": int(uvix_entries),

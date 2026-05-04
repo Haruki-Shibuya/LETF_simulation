@@ -1,0 +1,2 @@
+cagr,max_drawdown,annualized_vol,final_multiple,uvix_entries,uvix_exits,uvix_gspc_profit_exit_only,uvix_rsi_exit_only,uvix_rsi_and_gspc_profit_exit,low_rsi_entries,low_rsi_exits,skipped_uvix_entry_days,start,end,alpha_drawdown_pct,uvix_entry_rsi,uvix_entry_min_bb_z,uvix_exit_rsi,uvix_gspc_profit_exit_pct,low_rsi_entry,low_rsi_exit,signal_reference,execution
+1.087013121218357,-0.7784155475955875,0.6452883792474803,144738.89097471474,155,154,89,21,44,21,21,72,2010-02-12,2026-04-20,40.5,67.5,1.6,66.0,0.1,30.0,32.5,previous_close,same_next_open
