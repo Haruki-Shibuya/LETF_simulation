@@ -19,7 +19,7 @@ CANONICAL_2005_PATH = (
 )
 CANONICAL_2010_PATH = (
     OUTPUT_DIR
-    / "canonical_prev_close_signal_same_open_exec_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20100212_daily_path.csv"
+    / "canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20100212_daily_path.csv"
 )
 VALUATION_DAILY_PATH = OUTPUT_DIR / "valuation_forward_pe_2005_sim_daily_ffill.csv"
 MARKET_OHLC_PATH = OUTPUT_DIR / "next_open_ohlc_series_tqqq_tmf_gld.csv"
