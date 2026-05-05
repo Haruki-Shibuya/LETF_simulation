@@ -27,8 +27,7 @@ CANONICAL_2010_PATH = (
     OUTPUT_DIR
     / "canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20100212_daily_path.csv"
 )
-VALUATION_MONTHLY_PATH = OUTPUT_DIR / "valuation_forward_pe_2005_sim_monthly.csv"
-VALUATION_DAILY_PATH = OUTPUT_DIR / "valuation_forward_pe_2005_sim_daily_ffill.csv"
+VALUATION_DAILY_PATH = OUTPUT_DIR / "valuation_forward_pe_daily.csv"
 MARKET_OHLC_PATH = OUTPUT_DIR / "next_open_ohlc_series_tqqq_tmf_gld.csv"
 UVIX_OHLC_PATH = REPO_DIR / "uvix_backtest" / "output" / "uvix_ohlc_series.csv"
 
@@ -103,7 +102,11 @@ def uvix_to_base(frame: pd.DataFrame, selected: pd.Series, mask: pd.Series) -> p
 # ── factor construction ───────────────────────────────────────────────────────
 
 def build_monthly_factors() -> pd.DataFrame:
-    m = pd.read_csv(VALUATION_MONTHLY_PATH, parse_dates=["date"]).set_index("date").sort_index()
+    daily = pd.read_csv(VALUATION_DAILY_PATH, parse_dates=["date"]).set_index("date").sort_index()
+    # Resample to month-start using first available trading day.
+    # The daily file already has a 1-month EPS lag baked in, so no additional
+    # shift is needed here — the first day of month M reflects month M-1's EPS.
+    m = daily[["sp500_forward_pe", "qqq_forward_pe"]].resample("MS").first()
     sp = m["sp500_forward_pe"].astype(float)
     qqq = m["qqq_forward_pe"].astype(float)
 
