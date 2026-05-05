@@ -7,3 +7,4 @@ __pycache__/
 
 # Runtime logs
 **/dashboard_server.log
+.env
