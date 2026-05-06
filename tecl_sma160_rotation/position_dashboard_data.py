@@ -3,6 +3,7 @@ from __future__ import annotations
 import csv
 import json
 import math
+import time as time_module
 import urllib.parse
 import urllib.request
 from datetime import datetime, time
@@ -120,8 +121,13 @@ def _mode_availability(now_et: datetime) -> dict[str, bool]:
 
 def _yahoo_chart(symbol: str) -> dict[str, Any] | None:
     encoded = urllib.parse.quote(symbol, safe="")
-    url = f"https://query1.finance.yahoo.com/v8/finance/chart/{encoded}?interval=1m&range=1d&includePrePost=true"
-    request = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    ts = int(time_module.time())
+    url = f"https://query2.finance.yahoo.com/v8/finance/chart/{encoded}?interval=1m&range=1d&includePrePost=true&_={ts}"
+    request = urllib.request.Request(url, headers={
+        "User-Agent": "Mozilla/5.0",
+        "Cache-Control": "no-cache",
+        "Pragma": "no-cache",
+    })
     try:
         with urllib.request.urlopen(request, timeout=8) as response:
             payload = json.loads(response.read().decode("utf-8"))
@@ -157,6 +163,8 @@ def _yahoo_chart(symbol: str) -> dict[str, Any] | None:
         "last_ts": last_ts,
         "previous_close": previous_close,
         "regular_market_price": finite_or_none(meta.get("regularMarketPrice")),
+        "pre_market_price": finite_or_none(meta.get("preMarketPrice")),
+        "pre_market_time": meta.get("preMarketTime"),
         "timezone": meta.get("exchangeTimezoneName"),
         "points": points,
     }
@@ -325,11 +333,27 @@ def _premarket_proxy(now_et: datetime | None = None) -> dict[str, Any] | None:
     spy = _yahoo_chart("SPY")
     if not spy or spy["previous_close"] is None:
         return None
-    premarket_point = _last_point_between(spy, now_et, time(4, 0), time(9, 30))
-    if premarket_point is None:
-        return None
-    spy_price = _point_price(premarket_point)
+
+    # Prefer meta preMarketPrice/Time (real-time) over 1-minute bars (10-15 min delay)
+    spy_price: float | None = None
+    source_ts: int | None = None
+    pre_meta_price = spy.get("pre_market_price")
+    pre_meta_time = spy.get("pre_market_time")
+    if pre_meta_price and pre_meta_time:
+        pre_dt_et = datetime.fromtimestamp(pre_meta_time, tz=ZoneInfo("UTC")).astimezone(ET)
+        if pre_dt_et.date() == now_et.date() and time(4, 0) <= pre_dt_et.time() < time(9, 30):
+            spy_price = pre_meta_price
+            source_ts = pre_meta_time
+
+    # Fallback to last 1-minute bar
     if spy_price is None:
+        premarket_point = _last_point_between(spy, now_et, time(4, 0), time(9, 30))
+        if premarket_point is None:
+            return None
+        spy_price = _point_price(premarket_point)
+        source_ts = premarket_point["ts"] if premarket_point else None
+
+    if spy_price is None or source_ts is None:
         return None
     gspc = _yahoo_chart("^GSPC")
     tqqq = _yahoo_chart("TQQQ")
@@ -342,7 +366,7 @@ def _premarket_proxy(now_et: datetime | None = None) -> dict[str, Any] | None:
     if gspc_previous_close is None:
         return None
     implied_gspc_open = _gspc_from_spy(spy_price, spy["previous_close"], gspc_previous_close)
-    source_dt_jst = datetime.fromtimestamp(premarket_point["ts"], tz=ZoneInfo("UTC")).astimezone(JST)
+    source_dt_jst = datetime.fromtimestamp(source_ts, tz=ZoneInfo("UTC")).astimezone(JST)
     source_date = source_dt_jst.astimezone(ET).strftime("%Y-%m-%d")
     previous_closes = _gspc_close_history(source_date)
     rsi = _rsi_wilder(previous_closes + [implied_gspc_open])
