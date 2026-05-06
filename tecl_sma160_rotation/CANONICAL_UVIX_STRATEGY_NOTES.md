@@ -120,7 +120,7 @@ All figures below use:
 |---|---:|---:|---:|---:|---:|---|
 | 2005-12-20 | 94.0% | 113.017% | -69.63% | 160 | 32 | Direct prior-peak α version |
 | 2010-02-12 | 40.5% | 153.453% | -77.76% | 142 | 16 | Direct prior-peak α version |
-| 1991-01-02 | 100.0% (disabled) | 68.64% | -81.13% | 160 (post-2005 only) | 32 (post-2005) + pre-2005 | Stitched series, see below |
+| 1991-01-02 | 100.0% (全期間統一) | 68.78% | -81.13% | 160 (post-2005 only) | 32+ | Stitched series, α=100%全期間一貫 |
 
 Current choice: keep `GSPC gamma = +0.1%` without the GSPC stop-loss for canonical simplicity. The dashboard can switch between the 2005-start, 2010-start, and 1991-start versions.
 
@@ -249,12 +249,21 @@ The 1991 stitched canonical extends the backtest window to 1991-01-02 by prepend
 
 | Metric | Value |
 |--------|------:|
-| CAGR | 68.64% |
-| Annualized Vol | 60.39% |
+| CAGR | 68.78% |
+| Annualized Vol | 60.28% |
 | Max Drawdown | -81.13% |
-| Final Multiple | ~100 million× |
+| CAGR/Vol | 1.141 |
+| Final Multiple | ~104 million× |
 
 The CAGR is lower than the 2005/2010 starts because the pre-2005 period (1991–2005) had much lower compound returns (~22.9% CAGR) due to dot-com crash exposure and the absence of real UVIX.
+
+### なぜα=100%（再参入ルール無効）が全期間に適用されているか
+
+`α=94%`は2005-start・2010-startカノニカルの最適化値。この数値はドットコムバブル崩壊（2000–2002）を含まない期間で最適化されている。
+
+1991起点でα=94%を適用すると、2000–2002年のドットコム崩壊でTQQQの合成リターンが約99.9%下落し、α=94%の閾値が発動してバブル崩壊中にTQQQを再購入してしまう。これは「歴史を見た上で都合のよいパラメータを選んだ」のと同じことになる。
+
+α=100%（再参入なし）は事前に決定できる保守的なルールである。post-2005でα=94%が実際に発動したのは2009年3月の5日間のみで、その5日間もα=100%（wait_mix継続）の方がわずかに成績が良かった（CAGR差 +0.11pp）。したがってα=100%全期間統一版は整合的かつ保守的な定義として成立する。
 
 ### Generator script
 

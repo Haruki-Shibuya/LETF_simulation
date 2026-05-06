@@ -287,25 +287,43 @@ def main() -> None:
     pre_rows, pre_stats = simulate_pre2005(gspc, tqqq_cc, irx)
     print(f"  {pre_rows[0]['Date']} – {pre_rows[-1]['Date']}  ({len(pre_rows)} days)")
 
-    # ── Post-2005 actual canonical (copy columns) ─────────────────────────────
-    print("Loading post-2005 actual canonical ...")
-    post_df = pd.read_csv(CANON_2005_PATH, parse_dates=["Date"]).sort_values("Date")
-    print(f"  {post_df['Date'].iloc[0].date()} – {post_df['Date'].iloc[-1].date()}  "
+    # ── Post-2005: start from actual canonical, patch α=100% ─────────────────
+    # The actual canonical uses α=94%, which fires on 5 days in March 2009.
+    # For α=100% consistency, replace those trigger days with wait_mix returns.
+    print("Loading post-2005 actual canonical (patching α=94%→100%) ...")
+    post_df = pd.read_csv(CANON_2005_PATH, parse_dates=["Date"]).sort_values("Date").set_index("Date")
+    print(f"  {post_df.index[0].date()} – {post_df.index[-1].date()}  "
           f"({len(post_df)} days)")
 
-    # re-base equity so it continues from the last pre-2005 value
-    pre_last_equity = float(pre_rows[-1]["strategy_equity"])
-    post_rows: list[dict] = []
-    post_base_equity = float(post_df["strategy_equity"].iloc[0]) / (
-        1.0 + float(post_df["strategy_return"].iloc[0])
-    )  # equity at start of post period (=1.0 in original CSV)
+    trigger_dates = post_df[post_df["drawdown_trigger"] == True].index
+    print(f"  α=94% trigger days being patched to wait_mix: "
+          f"{[d.date().isoformat() for d in trigger_dates]}")
 
-    for _, r in post_df.iterrows():
-        orig_equity = float(r["strategy_equity"])
-        rebased     = pre_last_equity * orig_equity / 1.0   # original starts at 1.0
+    # For trigger days: substitute wait_mix return (0.5*TMF + 0.5*GLD CC return)
+    for d in trigger_dates:
+        if d in ohlc.index:
+            tmf_r = ohlc.loc[d, "TMF_RETURN"] if "TMF_RETURN" in ohlc.columns else np.nan
+            gld_r = ohlc.loc[d, "GLD_RETURN"] if "GLD_RETURN" in ohlc.columns else np.nan
+            if not (np.isnan(tmf_r) or np.isnan(gld_r)):
+                post_df.loc[d, "strategy_return"]           = 0.5 * tmf_r + 0.5 * gld_r
+                post_df.loc[d, "selected_leg"]              = "wait_mix"
+                post_df.loc[d, "drawdown_trigger"]          = False
+                post_df.loc[d, "base_target_regime_at_open"]= "wait_mix"
+                post_df.loc[d, "DRAWDOWN_ALPHA_PCT"]        = ALPHA_DRAWDOWN_PCT
+
+    # Recompute cumulative equity from the patched returns (post-2005 starts at 1.0)
+    post_returns = post_df["strategy_return"].values.astype(float)
+    post_equity  = np.cumprod(1.0 + np.clip(post_returns, -0.999999, None))
+    post_df["strategy_equity"] = post_equity
+
+    # Re-base equity to continue from last pre-2005 value
+    pre_last_equity = float(pre_rows[-1]["strategy_equity"])
+    post_df["strategy_equity"] = post_df["strategy_equity"] * pre_last_equity
+
+    post_rows: list[dict] = []
+    for d, r in post_df.iterrows():
         row = {c: str(r[c]) if c in r.index else "" for c in DAILY_PATH_COLS}
-        row["Date"]             = r["Date"].date().isoformat()
-        row["strategy_equity"]  = str(rebased)
+        row["Date"] = d.date().isoformat()
         post_rows.append(row)
 
     # ── Stitch ────────────────────────────────────────────────────────────────
@@ -372,9 +390,10 @@ def main() -> None:
         "base_reentry_rule":          "tqqq_open_drawdown_from_immediate_prior_peak",
         "transition_policy":          "one_open_transition_per_day",
         "series_note": (
+            "α=100% (drawdown re-entry disabled) applied consistently throughout 1991–2026. "
             "1991-01-02 to 2005-12-19: synthetic canonical (UVIX→Cash, wait_mix→Cash, "
-            "TQQQ→TQQQ_CC_RETURN_REBUILT, alpha=100). "
-            "2005-12-20 onward: actual canonical from_20051220."
+            "TQQQ→TQQQ_CC_RETURN_REBUILT). "
+            "2005-12-20 onward: actual canonical logic with α=94% trigger days patched to wait_mix."
         ),
     }
 
