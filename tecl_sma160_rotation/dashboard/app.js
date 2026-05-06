@@ -33,9 +33,9 @@
   function requestedStart() {
     const params = new URLSearchParams(window.location.search || "");
     const fromUrl = params.get("start");
-    if (fromUrl === "2005" || fromUrl === "2010") return fromUrl;
+    if (fromUrl === "2005" || fromUrl === "2010" || fromUrl === "1991") return fromUrl;
     const stored = window.localStorage && window.localStorage.getItem("canonicalStart");
-    return stored === "2010" ? "2010" : "2005";
+    return stored === "2010" ? "2010" : stored === "1991" ? "1991" : "2005";
   }
 
   function writeStart(start) {

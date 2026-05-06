@@ -1,0 +1,3 @@
+period,method,n_sim,actual_cagr%,actual_vol%,actual_mdd%,actual_sharpe,cagr_p1%,cagr_p5%,cagr_p25%,cagr_p50%,cagr_p75%,cagr_p95%,cagr_p99%,vol_p5%,vol_p50%,vol_p95%,mdd_p5%,mdd_p50%,mdd_p95%,loss_prob%,cvar5_cagr%,actual_pct_rank,sharpe_p5,sharpe_p50,sharpe_p95
+1991_stitched,A_stationary_block,2000,68.64,60.39,-81.13,1.136,35.25,44.14,57.53,67.75,78.61,97.26,109.89,57.42,60.3,63.25,-89.18,-74.83,-61.44,0.0,39.02,52.6,0.73,1.12,1.61
+1991_stitched,B_regime_aware,2000,68.64,60.39,-81.13,1.136,30.04,39.66,56.86,69.16,82.24,103.44,121.13,56.44,60.29,64.2,-91.12,-76.52,-62.71,0.0,34.14,48.6,0.67,1.15,1.7

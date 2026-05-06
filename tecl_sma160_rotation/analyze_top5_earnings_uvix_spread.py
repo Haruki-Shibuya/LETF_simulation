@@ -259,7 +259,7 @@ def main() -> None:
 
     all_episode_rows = []
     all_summary_rows = []
-    for variant in ["2005", "2010"]:
+    for variant in ["2005", "2010", "1991"]:
         episode_rows, summary_rows = run_variant(variant, all_events)
         all_episode_rows.extend(episode_rows)
         all_summary_rows.extend(summary_rows)

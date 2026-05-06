@@ -26,6 +26,11 @@ CANONICAL_VARIANTS = {
         "start": "2010-02-12",
         "stem": "canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20100212",
     },
+    "1991": {
+        "label": "1991-01-02開始（スティッチ）",
+        "start": "1991-01-02",
+        "stem": "canonical_stitched_1991",
+    },
 }
 DEFAULT_VARIANT = "2005"
 GSPC_OHLC_PATH = OUTPUT_DIR / "gspc_actual_ohlc_for_soxl_sma200_exit.csv"

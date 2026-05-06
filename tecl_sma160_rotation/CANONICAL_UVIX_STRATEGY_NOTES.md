@@ -1,6 +1,6 @@
 # Canonical UVIX Strategy Notes
 
-Last updated: 2026-05-04
+Last updated: 2026-05-05
 
 This document records the working definition, calculation history, and current canonical candidate for the high-RSI UVIX episode strategy. The purpose is to avoid losing track of which rule set produced which CAGR.
 
@@ -112,15 +112,17 @@ All figures below use:
 - `BB20 Z >= 1.6`
 - low-RSI TQQQ priority rule retained
 - backtest start selectable on the dashboard:
-  - `2005-12-20`
-  - `2010-02-12`
+  - `2005-12-20` — actual canonical (CAGR-maximized α = 94.0%)
+  - `2010-02-12` — actual canonical (CAGR-maximized α = 40.5%)
+  - `1991-01-02` — stitched canonical (see below for construction notes)
 
 | Start | α | CAGR | Max drawdown | UVIX entries | Low-RSI TQQQ entries | Notes |
 |---|---:|---:|---:|---:|---:|---|
 | 2005-12-20 | 94.0% | 113.017% | -69.63% | 160 | 32 | Direct prior-peak α version |
 | 2010-02-12 | 40.5% | 153.453% | -77.76% | 142 | 16 | Direct prior-peak α version |
+| 1991-01-02 | 100.0% (disabled) | 68.64% | -81.13% | 160 (post-2005 only) | 32 (post-2005) + pre-2005 | Stitched series, see below |
 
-Current choice: keep `GSPC gamma = +0.1%` without the GSPC stop-loss for canonical simplicity. The dashboard can switch between the 2005-start and 2010-start versions, because the optimized α differs materially by start date.
+Current choice: keep `GSPC gamma = +0.1%` without the GSPC stop-loss for canonical simplicity. The dashboard can switch between the 2005-start, 2010-start, and 1991-start versions.
 
 ## Overfitting Checks Performed
 
@@ -219,6 +221,53 @@ Recommended canonical stem:
 ```text
 canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20051220
 canonical_direct_peak_dd_bb20z_gspc_profit_entry67p5_exit66p0_gamma0p1_low_rsi_tqqq_from_20100212
+canonical_stitched_1991
+```
+
+## 1991 Stitched Canonical
+
+Added: 2026-05-05
+
+The 1991 stitched canonical extends the backtest window to 1991-01-02 by prepending a synthetic pre-2005 series.
+
+### Construction
+
+- **1991-01-02 to 2005-12-19** — Synthetic canonical:
+  - Full canonical logic: SMA160 base signal + BB20z/RSI overlays + drawdown re-entry + low-RSI TQQQ override
+  - UVIX → Cash (`^IRX` daily rate, annualised / 252). UVIX did not exist pre-2005.
+  - wait_mix (TMF 50% / GLD 50%) → Cash (`^IRX`). TMF/GLD data is limited pre-2005.
+  - TQQQ → `TQQQ_CC_RETURN_REBUILT` (synthetic calibrated returns from `next_open_ohlc_series_tqqq_tmf_gld.csv`)
+  - `ALPHA_DRAWDOWN_PCT = 100.0` (effectively disabled). The dot-com crash caused TQQQ to fall ~99.9% from its 2000 peak, so using the canonical α = 94.0% would erroneously trigger re-entry mid-crash.
+- **2005-12-20 onward** — Actual canonical CSV (`from_20051220`), columns copied directly. Equity is re-based to continue from the pre-2005 terminal value.
+
+### Output files
+
+- `output/canonical_stitched_1991_daily_path.csv` — full 8,887-day stitched daily path
+- `output/canonical_stitched_1991_summary.csv` — aggregate stats for the full 1991–2026 period
+
+### Key metrics (1991-01-02 to 2026-04-17)
+
+| Metric | Value |
+|--------|------:|
+| CAGR | 68.64% |
+| Annualized Vol | 60.39% |
+| Max Drawdown | -81.13% |
+| Final Multiple | ~100 million× |
+
+The CAGR is lower than the 2005/2010 starts because the pre-2005 period (1991–2005) had much lower compound returns (~22.9% CAGR) due to dot-com crash exposure and the absence of real UVIX.
+
+### Generator script
+
+```text
+tecl_sma160_rotation/build_canonical_1991_stitched.py
+```
+
+Re-run this script whenever the post-2005 canonical CSV is updated, then re-run the two build scripts to refresh embedded dashboard data:
+
+```bash
+python3 build_canonical_1991_stitched.py
+python3 build_position_dashboard_html_embedded.py
+python3 build_canonical_chart_html_embedded.py
 ```
 
 ## Dashboard Status
