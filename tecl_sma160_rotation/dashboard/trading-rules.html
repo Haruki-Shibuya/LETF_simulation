@@ -24,10 +24,23 @@
       </header>
 
       <section class="mode-bar" aria-label="開始日">
-        <a class="nav-link active" href="trading-rules.html?start=2005">2005開始</a>
-        <a class="nav-link" href="trading-rules.html?start=2010">2010開始</a>
-        <span class="refresh-status">Position / UVIX Episodesでは同じ開始日をボタンで切り替え可能。</span>
+        <select id="startSelect" class="mode-select" aria-label="バックテスト開始年">
+          <option value="2005">2005開始</option>
+          <option value="2010">2010開始</option>
+          <option value="1991">1991開始</option>
+        </select>
       </section>
+      <script>
+        (function () {
+          var sel = document.getElementById("startSelect");
+          var p = new URLSearchParams(window.location.search);
+          var v = p.get("start");
+          if (v === "2010" || v === "1991") sel.value = v;
+          sel.addEventListener("change", function () {
+            window.location.href = "trading-rules.html?start=" + sel.value;
+          });
+        })();
+      </script>
 
       <section class="decision-summary">
         <p class="summary-label">Current canonical</p>
