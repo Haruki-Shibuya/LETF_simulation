@@ -144,6 +144,12 @@ function selectVariant(sitePayload, start) {
     var all = current ? history.concat([current]) : history.slice();
     if (all.length < 2) return;
 
+    var timeEl = document.getElementById("chartSourceTime");
+    if (timeEl) {
+      var t = (payload.source && payload.source.source_time_jst) || (current && current.source_time_jst) || "";
+      timeEl.textContent = t ? "推定値取得: " + t : "";
+    }
+
     var n = all.length;
     var hasCurrent = !!current;
     var labels = all.map(function (p) { return p.date || ""; });
