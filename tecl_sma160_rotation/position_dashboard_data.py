@@ -194,6 +194,41 @@ def _bb20_z(previous_closes: list[float], open_input: float) -> float | None:
     return (open_input - mean) / std
 
 
+def _build_chart_history(n_days: int = 30) -> list[dict]:
+    rows = _read_rows(GSPC_OHLC_PATH)
+    dates: list[str] = []
+    opens: list[float] = []
+    closes: list[float] = []
+    for row in rows:
+        d = row.get("Date")
+        o = finite_or_none(row.get("GSPC_OPEN"))
+        c = finite_or_none(row.get("GSPC_CLOSE"))
+        if d and o is not None and c is not None:
+            dates.append(d)
+            opens.append(o)
+            closes.append(c)
+    n = len(closes)
+    if n < 21:
+        return []
+    start = max(20, n - n_days)
+    points: list[dict] = []
+    for i in range(start, n):
+        bb20_win = closes[i - 20 : i]
+        bb20_mean = sum(bb20_win) / 20
+        bb20_var = sum((v - bb20_mean) ** 2 for v in bb20_win) / 20
+        bb20_std = math.sqrt(bb20_var) if bb20_var > 0 else 0.0
+        bb20_upper = bb20_mean + 1.6 * bb20_std
+        rsi = _rsi_wilder(closes[:i] + [opens[i]])
+        points.append({
+            "date": dates[i],
+            "gspc_open": opens[i],
+            "gspc_close": closes[i],
+            "bb20_upper": bb20_upper,
+            "rsi14": rsi,
+        })
+    return points
+
+
 def _gspc_close_history(before_date: str | None = None) -> list[float]:
     rows = _read_rows(GSPC_OHLC_PATH)
     closes: list[float] = []
@@ -553,6 +588,29 @@ def build_position_dashboard_payload(mode: str = "latest", variant: str = DEFAUL
 
     decision = _latest_action(effective_latest, summary, active_entry)
 
+    chart_history = _build_chart_history(30)
+    chart_current: dict[str, Any] | None = None
+    src_date = effective_latest.get("Date")
+    src_open = finite_or_none(effective_latest.get("GSPC_OPEN"))
+    if src_date and src_open is not None:
+        prev_c = _gspc_close_history(src_date)
+        if len(prev_c) >= 20:
+            bb20_win = prev_c[-20:]
+            bb20_mean = sum(bb20_win) / 20
+            bb20_var = sum((v - bb20_mean) ** 2 for v in bb20_win) / 20
+            bb20_std = math.sqrt(bb20_var) if bb20_var > 0 else 0.0
+            bb20_upper = bb20_mean + 1.6 * bb20_std
+            rsi_c = _rsi_wilder(prev_c + [src_open])
+            if not chart_history or src_date > chart_history[-1]["date"]:
+                chart_current = {
+                    "date": src_date,
+                    "gspc_open": src_open,
+                    "gspc_close": None,
+                    "bb20_upper": bb20_upper,
+                    "rsi14": rsi_c,
+                    "is_current": True,
+                }
+
     def compact(row: dict[str, str] | None) -> dict[str, Any] | None:
         if row is None:
             return None
@@ -594,6 +652,8 @@ def build_position_dashboard_payload(mode: str = "latest", variant: str = DEFAUL
         "previous": compact(previous),
         "active_entry": compact(active_entry),
         "decision": decision,
+        "chart_history": chart_history,
+        "chart_current": chart_current,
         "summary": summary,
         "rules": {
             "取引タイミング": "現canonicalは当日始値を判断入力として使い、その同じ当日始値で1回だけ乗り換える。前日終値から当日始値までのリターンは前日から持っていたポジションで受け、当日始値から終値までのリターンは乗り換え後のポジションで受ける。",

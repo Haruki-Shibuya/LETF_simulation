@@ -138,6 +138,230 @@
       .join("");
   }
 
+  function renderBBChart(payload) {
+    var canvas = document.getElementById("bbChart");
+    if (!canvas) return;
+    var history = payload.chart_history || [];
+    var current = payload.chart_current || null;
+    var all = current ? history.concat([current]) : history.slice();
+    if (all.length < 2) return;
+
+    var dpr = window.devicePixelRatio || 1;
+    var W = canvas.offsetWidth || 640;
+    var H = canvas.offsetHeight || 220;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    var ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    var P = { top: 20, right: 20, bottom: 30, left: 68 };
+    var iW = W - P.left - P.right;
+    var iH = H - P.top - P.bottom;
+    var n = all.length;
+
+    var vals = [];
+    all.forEach(function (p) {
+      if (p.gspc_open != null) vals.push(p.gspc_open);
+      if (p.gspc_close != null) vals.push(p.gspc_close);
+      if (p.bb20_upper != null) vals.push(p.bb20_upper);
+    });
+    if (!vals.length) return;
+    var yMin = Math.min.apply(null, vals) * 0.996;
+    var yMax = Math.max.apply(null, vals) * 1.004;
+
+    function xOf(i) { return P.left + (n > 1 ? (i / (n - 1)) * iW : iW / 2); }
+    function yOf(v) { return P.top + (1 - (v - yMin) / (yMax - yMin)) * iH; }
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+
+    var GRID_N = 4;
+    for (var g = 0; g <= GRID_N; g++) {
+      var gv = yMin + (yMax - yMin) * (g / GRID_N);
+      var gy = yOf(gv);
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(P.left, gy); ctx.lineTo(W - P.right, gy); ctx.stroke();
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "11px ui-monospace,monospace";
+      ctx.textAlign = "right";
+      ctx.fillText(gv >= 1000 ? gv.toFixed(0) : gv.toFixed(1), P.left - 5, gy + 4);
+    }
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#d97706";
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([6, 3]);
+    var started = false;
+    all.forEach(function (p, i) {
+      if (p.bb20_upper == null) return;
+      if (!started) { ctx.moveTo(xOf(i), yOf(p.bb20_upper)); started = true; }
+      else ctx.lineTo(xOf(i), yOf(p.bb20_upper));
+    });
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2;
+    started = false;
+    all.forEach(function (p, i) {
+      var price = p.gspc_open != null ? p.gspc_open : p.gspc_close;
+      if (price == null) return;
+      if (!started) { ctx.moveTo(xOf(i), yOf(price)); started = true; }
+      else ctx.lineTo(xOf(i), yOf(price));
+    });
+    ctx.stroke();
+
+    if (current) {
+      var ci = all.length - 1;
+      var cprice = current.gspc_open;
+      if (cprice != null) {
+        var cx = xOf(ci), cy = yOf(cprice);
+        var above = current.bb20_upper != null && cprice >= current.bb20_upper;
+        ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+        ctx.fillStyle = above ? "#047857" : "#dc2626";
+        ctx.fill();
+        ctx.fillStyle = above ? "#047857" : "#dc2626";
+        ctx.font = "bold 11px ui-monospace,monospace";
+        ctx.textAlign = "center";
+        ctx.fillText(cprice.toFixed(0), cx, cy - 9);
+      }
+    }
+
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "10px ui-monospace,monospace";
+    ctx.textAlign = "center";
+    var step = Math.max(1, Math.round(n / 6));
+    all.forEach(function (p, i) {
+      if (i % step === 0 || i === n - 1) {
+        ctx.fillText((p.date || "").slice(5), xOf(i), H - P.bottom + 14);
+      }
+    });
+
+    ctx.font = "11px ui-sans-serif,sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath(); ctx.arc(P.left + 8, P.top + 8, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillText("GSPC open", P.left + 16, P.top + 12);
+    ctx.strokeStyle = "#d97706"; ctx.lineWidth = 1.5; ctx.setLineDash([5, 3]);
+    ctx.beginPath(); ctx.moveTo(P.left + 112, P.top + 8); ctx.lineTo(P.left + 126, P.top + 8); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#d97706";
+    ctx.fillText("BB20 +1.6σ", P.left + 130, P.top + 12);
+  }
+
+  function renderRSIChart(payload) {
+    var canvas = document.getElementById("rsiChart");
+    if (!canvas) return;
+    var history = payload.chart_history || [];
+    var current = payload.chart_current || null;
+    var all = current ? history.concat([current]) : history.slice();
+    if (all.length < 2) return;
+
+    var dpr = window.devicePixelRatio || 1;
+    var W = canvas.offsetWidth || 640;
+    var H = canvas.offsetHeight || 160;
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    var ctx = canvas.getContext("2d");
+    ctx.scale(dpr, dpr);
+
+    var P = { top: 20, right: 20, bottom: 30, left: 44 };
+    var iW = W - P.left - P.right;
+    var iH = H - P.top - P.bottom;
+    var n = all.length;
+
+    var rsiVals = all.map(function (p) { return p.rsi14; }).filter(function (v) { return v != null; });
+    if (!rsiVals.length) return;
+    var yMin = Math.min(Math.min.apply(null, rsiVals) - 2, 60);
+    var yMax = Math.max(Math.max.apply(null, rsiVals) + 2, 75);
+
+    function xOf(i) { return P.left + (n > 1 ? (i / (n - 1)) * iW : iW / 2); }
+    function yOf(v) { return P.top + (1 - (v - yMin) / (yMax - yMin)) * iH; }
+
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, W, H);
+
+    var GRID_N = 4;
+    for (var g = 0; g <= GRID_N; g++) {
+      var gv = yMin + (yMax - yMin) * (g / GRID_N);
+      var gy = yOf(gv);
+      ctx.strokeStyle = "#e5e7eb";
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.moveTo(P.left, gy); ctx.lineTo(W - P.right, gy); ctx.stroke();
+      ctx.fillStyle = "#9ca3af";
+      ctx.font = "11px ui-monospace,monospace";
+      ctx.textAlign = "right";
+      ctx.fillText(gv.toFixed(0), P.left - 5, gy + 4);
+    }
+
+    var ENTRY_RSI = 67.5, EXIT_RSI = 66.0;
+    ctx.lineWidth = 1;
+    ctx.setLineDash([6, 3]);
+    ctx.strokeStyle = "#047857";
+    ctx.beginPath(); ctx.moveTo(P.left, yOf(ENTRY_RSI)); ctx.lineTo(W - P.right, yOf(ENTRY_RSI)); ctx.stroke();
+    ctx.strokeStyle = "#d97706";
+    ctx.beginPath(); ctx.moveTo(P.left, yOf(EXIT_RSI)); ctx.lineTo(W - P.right, yOf(EXIT_RSI)); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.font = "10px ui-monospace,monospace";
+    ctx.textAlign = "right";
+    ctx.fillStyle = "#047857";
+    ctx.fillText("67.5", W - P.right - 4, yOf(ENTRY_RSI) - 3);
+    ctx.fillStyle = "#d97706";
+    ctx.fillText("66.0", W - P.right - 4, yOf(EXIT_RSI) + 11);
+
+    ctx.beginPath();
+    ctx.strokeStyle = "#2563eb";
+    ctx.lineWidth = 2;
+    var started = false;
+    all.forEach(function (p, i) {
+      if (p.rsi14 == null) return;
+      if (!started) { ctx.moveTo(xOf(i), yOf(p.rsi14)); started = true; }
+      else ctx.lineTo(xOf(i), yOf(p.rsi14));
+    });
+    ctx.stroke();
+
+    if (current && current.rsi14 != null) {
+      var ci = all.length - 1;
+      var cx = xOf(ci), cy = yOf(current.rsi14);
+      var rcolor = current.rsi14 >= ENTRY_RSI ? "#047857" : current.rsi14 >= EXIT_RSI ? "#d97706" : "#dc2626";
+      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI * 2);
+      ctx.fillStyle = rcolor;
+      ctx.fill();
+      ctx.fillStyle = rcolor;
+      ctx.font = "bold 11px ui-monospace,monospace";
+      ctx.textAlign = "center";
+      ctx.fillText(current.rsi14.toFixed(1), cx, cy - 9);
+    }
+
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "10px ui-monospace,monospace";
+    ctx.textAlign = "center";
+    var step = Math.max(1, Math.round(n / 6));
+    all.forEach(function (p, i) {
+      if (i % step === 0 || i === n - 1) {
+        ctx.fillText((p.date || "").slice(5), xOf(i), H - P.bottom + 14);
+      }
+    });
+
+    ctx.font = "11px ui-sans-serif,sans-serif";
+    ctx.textAlign = "left";
+    ctx.fillStyle = "#2563eb";
+    ctx.beginPath(); ctx.arc(P.left + 8, P.top + 8, 4, 0, Math.PI * 2); ctx.fill();
+    ctx.fillText("RSI14", P.left + 16, P.top + 12);
+    ctx.strokeStyle = "#047857"; ctx.lineWidth = 1; ctx.setLineDash([5, 3]);
+    ctx.beginPath(); ctx.moveTo(P.left + 68, P.top + 8); ctx.lineTo(P.left + 82, P.top + 8); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#047857";
+    ctx.fillText("entry 67.5", P.left + 86, P.top + 12);
+    ctx.strokeStyle = "#d97706"; ctx.lineWidth = 1; ctx.setLineDash([5, 3]);
+    ctx.beginPath(); ctx.moveTo(P.left + 168, P.top + 8); ctx.lineTo(P.left + 182, P.top + 8); ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.fillStyle = "#d97706";
+    ctx.fillText("exit 66.0", P.left + 186, P.top + 12);
+  }
+
   function renderError(message) {
     $("#decisionSummary").innerHTML =
       '<div class="summary-main">Dashboard error</div><div class="summary-sub">' + message + "</div>";
@@ -177,6 +401,8 @@
     renderRules(payload);
     renderModeButtons(payload);
     renderStartButtons(payload);
+    renderBBChart(payload);
+    renderRSIChart(payload);
   }
 
   function apiUrl(mode, start) {
