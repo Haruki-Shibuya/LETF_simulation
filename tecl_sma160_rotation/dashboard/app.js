@@ -38,14 +38,7 @@
     return stored === "2010" ? "2010" : stored === "1991" ? "1991" : "2005";
   }
 
-  function writeStart(start) {
-    if (window.localStorage) window.localStorage.setItem("canonicalStart", start);
-    const url = new URL(window.location.href);
-    url.searchParams.set("start", start);
-    window.history.replaceState(null, "", url.pathname + url.search + url.hash);
-  }
-
-  function selectVariant(sitePayload, start) {
+function selectVariant(sitePayload, start) {
     if (sitePayload && sitePayload.variants) {
       return sitePayload.variants[start] || sitePayload.variants[sitePayload.selected_variant] || sitePayload.variants["2005"];
     }
@@ -370,20 +363,13 @@
     sel.value = selected;
   }
 
-  function renderStartButtons(payload) {
-    const selected = (payload && payload.variant) || currentStart || "2005";
-    const sel = document.getElementById("startSelect");
-    if (sel) sel.value = selected;
-  }
-
-  function render(payload) {
+function render(payload) {
     renderSummary(payload);
     renderMetrics(payload);
     renderReasons(payload);
     renderEntry(payload);
     renderRules(payload);
     renderModeButtons(payload);
-    renderStartButtons(payload);
     renderBBChart(payload);
     renderRSIChart(payload);
   }
@@ -422,22 +408,6 @@
     modeSelEl.addEventListener("change", function () { refreshMode(modeSelEl.value); });
   }
 
-  const startSelEl = document.getElementById("startSelect");
-  if (startSelEl) {
-    startSelEl.addEventListener("change", function () {
-      currentStart = startSelEl.value || "2005";
-      writeStart(currentStart);
-      const nextPayload = selectVariant(sitePayload, currentStart);
-      if (nextPayload) {
-        currentPayload = nextPayload;
-        render(currentPayload);
-      }
-      if (window.location.protocol !== "file:") {
-        const mode = (currentPayload && currentPayload.modes && currentPayload.modes.selected) || "latest";
-        refreshMode(mode);
-      }
-    });
-  }
 
   const sitePayload = readPayload();
   let currentStart = requestedStart();

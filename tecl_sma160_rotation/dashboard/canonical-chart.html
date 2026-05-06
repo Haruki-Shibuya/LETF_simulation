@@ -40,27 +40,22 @@
         align-items: center;
         margin: 0 0 12px;
       }
-      .start-button {
+      .start-select {
         min-height: 36px;
-        padding: 7px 12px;
+        padding: 6px 28px 6px 10px;
         border: 1px solid #b8c2d2;
         border-radius: 8px;
         background: #ffffff;
         color: #344054;
         font: inherit;
         font-size: 13px;
-        font-weight: 850;
+        font-weight: 700;
         cursor: pointer;
+        appearance: auto;
       }
-      .start-button:hover {
-        border-color: #7aa2ef;
-        color: #1d4ed8;
-        background: #f8fbff;
-      }
-      .start-button.active {
-        border-color: #2563eb;
-        color: #ffffff;
-        background: #2563eb;
+      .start-select:focus {
+        outline: 2px solid #93c5fd;
+        outline-offset: 1px;
       }
       .episode-toolbar button {
         font-size: 1.35rem;
@@ -499,9 +494,11 @@
         </div>
       </header>
       <section class="start-switch" aria-label="開始日">
-        <button type="button" class="start-button" data-start="2005">2005開始</button>
-        <button type="button" class="start-button" data-start="2010">2010開始</button>
-        <button type="button" class="start-button" data-start="1991">1991開始</button>
+        <select id="startSelect" class="start-select" aria-label="バックテスト開始年">
+          <option value="2005">2005開始</option>
+          <option value="2010">2010開始</option>
+          <option value="1991">1991開始</option>
+        </select>
       </section>
       <div id="episodeToolbar" class="episode-toolbar" hidden>
         <button type="button" id="epPrev" aria-label="前のエピソード">←</button>

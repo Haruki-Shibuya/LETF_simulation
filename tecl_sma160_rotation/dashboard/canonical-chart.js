@@ -67,9 +67,8 @@
 
   function syncStartButtons(data) {
     var selected = (data && data.variant) || currentStart || "2005";
-    document.querySelectorAll(".start-button").forEach(function (button) {
-      button.classList.toggle("active", button.dataset.start === selected);
-    });
+    var sel = document.getElementById("startSelect");
+    if (sel) sel.value = selected;
   }
 
   function sliceArray(arr, i0, i1) {
@@ -921,9 +920,10 @@
     renderEpisode(idx);
   }
 
-  document.querySelectorAll(".start-button").forEach(function (button) {
-    button.addEventListener("click", function () {
-      currentStart = button.dataset.start || "2005";
+  var startSelEl = document.getElementById("startSelect");
+  if (startSelEl) {
+    startSelEl.addEventListener("change", function () {
+      currentStart = startSelEl.value || "2005";
       writeStart(currentStart);
       var nextData = selectVariant(sitePayload, currentStart);
       if (nextData) {
@@ -944,7 +944,7 @@
           });
       }
     });
-  });
+  }
 
   var embedded = parseEmbedded();
   if (embedded) {
