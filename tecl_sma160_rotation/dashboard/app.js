@@ -204,14 +204,31 @@
     ctx.beginPath();
     ctx.strokeStyle = "#2563eb";
     ctx.lineWidth = 2;
+    ctx.setLineDash([]);
     started = false;
-    all.forEach(function (p, i) {
+    history.forEach(function (p, i) {
       var price = p.gspc_open != null ? p.gspc_open : p.gspc_close;
       if (price == null) return;
       if (!started) { ctx.moveTo(xOf(i), yOf(price)); started = true; }
       else ctx.lineTo(xOf(i), yOf(price));
     });
     ctx.stroke();
+
+    if (current && history.length > 0) {
+      var lh = history[history.length - 1];
+      var lp = lh.gspc_open != null ? lh.gspc_open : lh.gspc_close;
+      var cp2 = current.gspc_open;
+      if (lp != null && cp2 != null) {
+        ctx.beginPath();
+        ctx.strokeStyle = "#2563eb";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.moveTo(xOf(history.length - 1), yOf(lp));
+        ctx.lineTo(xOf(all.length - 1), yOf(cp2));
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
 
     if (current) {
       var ci = all.length - 1;
@@ -314,13 +331,28 @@
     ctx.beginPath();
     ctx.strokeStyle = "#2563eb";
     ctx.lineWidth = 2;
+    ctx.setLineDash([]);
     var started = false;
-    all.forEach(function (p, i) {
+    history.forEach(function (p, i) {
       if (p.rsi14 == null) return;
       if (!started) { ctx.moveTo(xOf(i), yOf(p.rsi14)); started = true; }
       else ctx.lineTo(xOf(i), yOf(p.rsi14));
     });
     ctx.stroke();
+
+    if (current && current.rsi14 != null && history.length > 0) {
+      var lh = history[history.length - 1];
+      if (lh.rsi14 != null) {
+        ctx.beginPath();
+        ctx.strokeStyle = "#2563eb";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.moveTo(xOf(history.length - 1), yOf(lh.rsi14));
+        ctx.lineTo(xOf(all.length - 1), yOf(current.rsi14));
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+    }
 
     if (current && current.rsi14 != null) {
       var ci = all.length - 1;
