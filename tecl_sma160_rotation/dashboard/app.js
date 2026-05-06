@@ -383,10 +383,16 @@ function render(payload) {
     return "/api/position" + query;
   }
 
+  function setRefreshBusy(busy) {
+    const modeSelEl = document.getElementById("modeSelect");
+    const refreshBtn = document.getElementById("refreshBtn");
+    if (modeSelEl) modeSelEl.disabled = busy;
+    if (refreshBtn) refreshBtn.disabled = busy;
+  }
+
   async function refreshMode(mode) {
     setRefreshStatus("更新中...");
-    const modeSelEl = document.getElementById("modeSelect");
-    if (modeSelEl) modeSelEl.disabled = true;
+    setRefreshBusy(true);
     try {
       const response = await fetch(apiUrl(mode, currentStart), { cache: "no-store" });
       const payload = await response.json();
@@ -399,13 +405,21 @@ function render(payload) {
       renderModeButtons(currentPayload || {});
       setRefreshStatus("更新失敗: ローカルサーバ http://127.0.0.1:8765 を起動してください", true);
     } finally {
-      if (modeSelEl) modeSelEl.disabled = false;
+      setRefreshBusy(false);
     }
   }
 
   const modeSelEl = document.getElementById("modeSelect");
   if (modeSelEl) {
     modeSelEl.addEventListener("change", function () { refreshMode(modeSelEl.value); });
+  }
+
+  const refreshBtn = document.getElementById("refreshBtn");
+  if (refreshBtn) {
+    refreshBtn.addEventListener("click", function () {
+      const mode = (modeSelEl && modeSelEl.value) || "latest";
+      refreshMode(mode);
+    });
   }
 
 
