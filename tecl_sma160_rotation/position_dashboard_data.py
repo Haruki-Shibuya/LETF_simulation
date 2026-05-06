@@ -604,6 +604,7 @@ def build_position_dashboard_payload(mode: str = "latest", variant: str = DEFAUL
             if not chart_history or src_date > chart_history[-1]["date"]:
                 chart_current = {
                     "date": src_date,
+                    "source_time_jst": source.get("source_time_jst"),
                     "gspc_open": src_open,
                     "gspc_close": None,
                     "bb20_upper": bb20_upper,

@@ -204,7 +204,7 @@
           legend: { position: "top", labels: { boxWidth: 16, padding: 12, font: { size: 11 } } },
           tooltip: {
             callbacks: {
-              title: function (items) { return all[items[0].dataIndex].date || ""; },
+              title: function (items) { var p = all[items[0].dataIndex]; return p.source_time_jst || p.date || ""; },
               label: function (ctx) {
                 var v = ctx.parsed.y;
                 var str = ctx.dataset.label + ": " + (v != null ? v.toFixed(0) : "-");
@@ -316,7 +316,7 @@
           tooltip: {
             filter: function (item) { return item.dataset.label === "RSI14"; },
             callbacks: {
-              title: function (items) { return all[items[0].dataIndex].date || ""; },
+              title: function (items) { var p = all[items[0].dataIndex]; return p.source_time_jst || p.date || ""; },
               label: function (ctx) {
                 var v = ctx.parsed.y;
                 var str = "RSI14: " + (v != null ? v.toFixed(1) : "-");
