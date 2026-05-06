@@ -423,8 +423,7 @@ function render(payload) {
   const refreshBtn = document.getElementById("refreshBtn");
   if (refreshBtn) {
     refreshBtn.addEventListener("click", function () {
-      const mode = (modeSelEl && modeSelEl.value) || "latest";
-      refreshMode(mode);
+      window.location.reload();
     });
   }
 

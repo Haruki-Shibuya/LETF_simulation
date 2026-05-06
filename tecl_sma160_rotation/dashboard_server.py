@@ -3,12 +3,18 @@ from __future__ import annotations
 import argparse
 import json
 import mimetypes
+import re
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from canonical_chart_data import DASHBOARD_DIR, build_canonical_chart_payload
-from position_dashboard_data import build_position_dashboard_payload
+from position_dashboard_data import build_position_dashboard_payload, position_dashboard_json
+
+_EMBED_PATTERN = re.compile(
+    r'(<script id="__positionEmbed" type="application/json">)(.*?)(</script>)',
+    re.DOTALL,
+)
 
 
 class DashboardHandler(BaseHTTPRequestHandler):
@@ -25,6 +31,9 @@ class DashboardHandler(BaseHTTPRequestHandler):
             return
         if parsed.path in {"", "/"}:
             self.redirect("/index.html")
+            return
+        if parsed.path == "/index.html":
+            self.respond_index_html()
             return
         self.respond_static(parsed.path)
 
@@ -73,6 +82,28 @@ class DashboardHandler(BaseHTTPRequestHandler):
             body = json.dumps({"error": str(exc)}, ensure_ascii=False).encode("utf-8")
             self.send_response(500)
         self._send_common_headers("application/json; charset=utf-8", len(body))
+        self.end_headers()
+        self.wfile.write(body)
+
+    def respond_index_html(self) -> None:
+        try:
+            html = (DASHBOARD_DIR / "index.html").read_text(encoding="utf-8")
+            payload = position_dashboard_json()
+            body_str, count = _EMBED_PATTERN.subn(
+                lambda m: m.group(1) + payload + m.group(3), html
+            )
+            if count != 1:
+                raise RuntimeError("__positionEmbed script tag not found in index.html")
+            body = body_str.encode("utf-8")
+            self.send_response(200)
+            content_type = "text/html; charset=utf-8"
+        except Exception as exc:
+            body = f"<pre>Server error: {exc}</pre>".encode("utf-8")
+            self.send_response(500)
+            content_type = "text/html; charset=utf-8"
+        self.send_header("Content-Type", content_type)
+        self.send_header("Cache-Control", "no-store")
+        self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
 

@@ -76,7 +76,10 @@
           <div class="panel-head">
             <h2>GSPC BB20 チャート（直近30日）</h2>
             <div style="display:flex;flex-direction:column;align-items:flex-end;gap:2px">
-              <span id="chartSourceTime" class="chart-source-time"></span>
+              <div style="display:flex;align-items:center;gap:6px">
+                <span id="chartSourceTime" class="chart-source-time"></span>
+                <button type="button" onclick="window.location.reload()" class="chart-reload-button" title="最新データで再読み込み">⟳</button>
+              </div>
               <span class="chart-hint">スクロールでズーム・ドラッグでパン・ダブルクリックでリセット</span>
             </div>
           </div>
