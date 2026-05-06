@@ -362,19 +362,18 @@
     const modes = payload.modes || {};
     const selected = modes.selected || (payload.source && payload.source.selected_mode) || "latest";
     const availability = modes.availability || {};
-    document.querySelectorAll(".mode-button").forEach((button) => {
-      const mode = button.dataset.mode;
-      const enabled = availability[mode] !== false;
-      button.disabled = !enabled;
-      button.classList.toggle("active", mode === selected);
+    const sel = document.getElementById("modeSelect");
+    if (!sel) return;
+    Array.from(sel.options).forEach(function (opt) {
+      opt.disabled = availability[opt.value] === false;
     });
+    sel.value = selected;
   }
 
   function renderStartButtons(payload) {
     const selected = (payload && payload.variant) || currentStart || "2005";
-    document.querySelectorAll(".start-button").forEach((button) => {
-      button.classList.toggle("active", button.dataset.start === selected);
-    });
+    const sel = document.getElementById("startSelect");
+    if (sel) sel.value = selected;
   }
 
   function render(payload) {
@@ -400,9 +399,8 @@
 
   async function refreshMode(mode) {
     setRefreshStatus("更新中...");
-    document.querySelectorAll(".mode-button").forEach((button) => {
-      button.disabled = true;
-    });
+    const modeSelEl = document.getElementById("modeSelect");
+    if (modeSelEl) modeSelEl.disabled = true;
     try {
       const response = await fetch(apiUrl(mode, currentStart), { cache: "no-store" });
       const payload = await response.json();
@@ -414,16 +412,20 @@
     } catch (error) {
       renderModeButtons(currentPayload || {});
       setRefreshStatus("更新失敗: ローカルサーバ http://127.0.0.1:8765 を起動してください", true);
+    } finally {
+      if (modeSelEl) modeSelEl.disabled = false;
     }
   }
 
-  document.querySelectorAll(".mode-button").forEach((button) => {
-    button.addEventListener("click", () => refreshMode(button.dataset.mode));
-  });
+  const modeSelEl = document.getElementById("modeSelect");
+  if (modeSelEl) {
+    modeSelEl.addEventListener("change", function () { refreshMode(modeSelEl.value); });
+  }
 
-  document.querySelectorAll(".start-button").forEach((button) => {
-    button.addEventListener("click", () => {
-      currentStart = button.dataset.start || "2005";
+  const startSelEl = document.getElementById("startSelect");
+  if (startSelEl) {
+    startSelEl.addEventListener("change", function () {
+      currentStart = startSelEl.value || "2005";
       writeStart(currentStart);
       const nextPayload = selectVariant(sitePayload, currentStart);
       if (nextPayload) {
@@ -435,7 +437,7 @@
         refreshMode(mode);
       }
     });
-  });
+  }
 
   const sitePayload = readPayload();
   let currentStart = requestedStart();

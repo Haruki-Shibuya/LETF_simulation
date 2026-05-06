@@ -157,6 +157,31 @@ h1 {
   background: #cbd5e1;
 }
 
+.mode-select {
+  min-height: 36px;
+  padding: 6px 28px 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+  color: #344054;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  appearance: auto;
+}
+
+.mode-select:focus {
+  outline: 2px solid #93c5fd;
+  outline-offset: 1px;
+}
+
+.mode-select:disabled {
+  color: #98a2b3;
+  background: #eef0f3;
+  cursor: not-allowed;
+}
+
 .mode-button:hover:not(:disabled) {
   border-color: #9bb7f5;
   color: #1d4ed8;

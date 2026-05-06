@@ -662,7 +662,7 @@ def build_position_dashboard_payload(mode: str = "latest", variant: str = DEFAUL
             "基本ポジション": "GSPCがSMA160以上ならTQQQ。GSPCがSMA160を下回った直後は安全資産としてTMF 50% / GLD 50%。",
             "TQQQ再エントリー": f"安全資産中にTQQQ始値が直前ピークからα%以上下落したらTQQQを拾う。この開始日版ではCAGR最大化でα = {finite_or_none(summary.get('alpha_drawdown_pct')):g}%。",
             "高RSI UVIX最優先ルール": "Implied RSI (14) >= 67.5 かつ GSPC BB20 Z >= 1.6 なら、基本ポジションより優先してUVIXへ乗り換える。",
-            "高RSI UVIX終了条件": "Implied RSI (14) <= 66.0、またはGSPC始値 <= 高RSI UVIX発動時のGSPC始値 +0.1% でUVIXを終了する。",
+            "高RSI UVIX終了条件": "翌日以降の始値で判断。①Implied RSI (14) <= 66.0になった場合、または②翌日以降のGSPC始値が発動時GSPC始値×1.001以下に戻った場合（＝発動後に+0.1%以上の上昇を確認できなかった場合）にUVIXを終了する。②は利確ではなく「勢いが続かなかった場合の撤退」条件。",
             "低RSI TQQQ最優先ルール": "安全資産中にImplied RSI (14) < 30.0ならTQQQへ乗り換え、32.5以上で終了する。",
         },
     }
