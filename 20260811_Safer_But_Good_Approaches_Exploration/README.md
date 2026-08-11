@@ -23,7 +23,7 @@ The primary research window should begin around 1996 and extend through the late
 ## Principles
 
 - Full-period pretax CAGR must be at least 30% after modeled expenses, financing, trading costs, and rebalancing drag.
-- Pretax CAGR from the beginning of 2008 through the simulation end must also be at least 30%, measured as a continued subperiod with the pre-2008 signal state retained.
+- Pretax CAGR from the beginning of 2008 through the simulation end must be greater than 30%, measured as a continued subperiod with the pre-2008 signal state retained.
 - Both CAGR requirements must hold under the 0-day and 1-day additional-delay cases.
 - The strategy must survive the full dot-com collapse without a near wipeout.
 - Strategy and buy-and-hold comparisons must use realized-gain taxation, cost basis, loss offsets and carryforwards, tax deferral, and final-liquidation tax.
@@ -35,7 +35,7 @@ The primary research window should begin around 1996 and extend through the late
 
 The strategy must achieve a pretax compound annual growth rate of at least 30% over the full simulation period.
 
-It must also achieve at least 30% pretax CAGR from the beginning of 2008 through the end of the simulation. Both thresholds apply to the 0-day and 1-day additional-delay cases.
+It must also achieve greater than 30% pretax CAGR from the beginning of 2008 through the end of the simulation. Both thresholds apply to the 0-day and 1-day additional-delay cases.
 
 Pretax performance must be calculated after incorporating:
 
@@ -141,7 +141,7 @@ Reject strategies whose results depend primarily on a small number of perfectly 
 A candidate qualifies for further consideration only if it:
 
 1. Achieves at least 30% full-period pretax CAGR after modeled costs and drag.
-2. Achieves at least 30% pretax CAGR from 2008 onward after modeled costs and drag.
+2. Achieves greater than 30% pretax CAGR from 2008 onward after modeled costs and drag.
 3. Meets both CAGR thresholds under the 0-day and 1-day additional-delay cases.
 4. Avoids a near wipeout during the 2000–2003 dot-com collapse.
 5. Produces a credible after-tax advantage or clearly explains why its pretax advantage does not survive taxation.
