@@ -388,6 +388,201 @@ def save_comparison_plots(
     plt.close(fig)
 
 
+def save_annual_return_comparison(
+    selected_paths: dict[tuple[str, int], pd.DataFrame],
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """Compare baseline and the 10% risk-off TQQQ sleeve by calendar year."""
+    comparison_ids = {
+        "Baseline": "baseline",
+        "10% TQQQ sleeve": "partial_riskoff_0.10",
+    }
+    annual_series = {}
+    for label, candidate_id in comparison_ids.items():
+        path = selected_paths[(candidate_id, 1)]
+        annual_series[label] = (
+            (1.0 + path["net_return"])
+            .groupby(path.index.year)
+            .prod()
+            .sub(1.0)
+        )
+
+    annual = pd.DataFrame(annual_series)
+    annual.index.name = "year"
+    final_year = int(annual.index.max())
+    annual["difference_sleeve_minus_baseline"] = (
+        annual["10% TQQQ sleeve"] - annual["Baseline"]
+    )
+    annual["complete_year"] = annual.index < final_year
+    annual.to_csv(OUTPUT / "baseline_vs_partial10_delay1_annual_returns.csv")
+
+    complete = annual.loc[annual["complete_year"], list(comparison_ids)]
+    summary_rows = []
+    for label in comparison_ids:
+        values = complete[label]
+        summary_rows.append(
+            {
+                "strategy": label,
+                "complete_years": int(values.shape[0]),
+                "mean_annual_return": float(values.mean()),
+                "median_annual_return": float(values.median()),
+                "annual_return_std": float(values.std(ddof=1)),
+                "minimum_annual_return": float(values.min()),
+                "minimum_year": int(values.idxmin()),
+                "maximum_annual_return": float(values.max()),
+                "maximum_year": int(values.idxmax()),
+                "positive_years": int((values > 0.0).sum()),
+                "negative_years": int((values < 0.0).sum()),
+            }
+        )
+    summary = pd.DataFrame(summary_rows)
+    summary.to_csv(
+        OUTPUT / "baseline_vs_partial10_delay1_annual_summary.csv", index=False
+    )
+
+    plt.style.use("seaborn-v0_8-whitegrid")
+    baseline_color = "#555555"
+    sleeve_color = "#4C78A8"
+    ink = "#222222"
+    years = annual.index.to_numpy()
+    x = np.arange(len(years))
+    width = 0.38
+
+    fig, ax = plt.subplots(figsize=(15, 7.5), dpi=170)
+    baseline_bars = ax.bar(
+        x - width / 2.0,
+        annual["Baseline"],
+        width,
+        label="Baseline",
+        color=baseline_color,
+        edgecolor=ink,
+        linewidth=0.6,
+    )
+    sleeve_bars = ax.bar(
+        x + width / 2.0,
+        annual["10% TQQQ sleeve"],
+        width,
+        label="10% TQQQ sleeve in risk-off",
+        color=sleeve_color,
+        edgecolor=ink,
+        linewidth=0.6,
+        hatch="//",
+    )
+    baseline_bars[-1].set_hatch("...")
+    sleeve_bars[-1].set_hatch("xx")
+    for bars, values in [
+        (baseline_bars, annual["Baseline"]),
+        (sleeve_bars, annual["10% TQQQ sleeve"]),
+    ]:
+        for bar, value, year in zip(bars, values, years):
+            if value < 0.0 or year == final_year:
+                offset = 0.025 if value >= 0.0 else -0.025
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2.0,
+                    value + offset,
+                    f"{value:.0%}",
+                    ha="center",
+                    va="bottom" if value >= 0.0 else "top",
+                    rotation=90,
+                    fontsize=7,
+                    color=ink,
+                )
+    ax.axhline(0.0, color=ink, linewidth=1.0)
+    ax.set_title(
+        "Calendar-year returns: baseline versus a 10% TQQQ sleeve in risk-off\n"
+        "One-day additional execution delay; 1996–2026, with 2026 through April 17",
+        loc="left",
+    )
+    ax.set_xlabel("Calendar year")
+    ax.set_ylabel("Calendar-year return")
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.set_xticks(x)
+    ax.set_xticklabels(
+        [f"{year} YTD" if year == final_year else str(year) for year in years],
+        rotation=45,
+        ha="right",
+    )
+    ax.legend(frameon=False, ncol=2, loc="upper left")
+    ax.margins(y=0.10)
+    fig.tight_layout()
+    fig.savefig(
+        OUTPUT / "baseline_vs_partial10_delay1_annual_returns.png",
+        bbox_inches="tight",
+    )
+    plt.close(fig)
+
+    bin_width = 0.20
+    all_values = complete.to_numpy().ravel()
+    lower = np.floor(all_values.min() / bin_width) * bin_width
+    upper = np.ceil(all_values.max() / bin_width) * bin_width + bin_width
+    bins = np.arange(lower, upper + 1e-12, bin_width)
+    baseline_counts, _ = np.histogram(complete["Baseline"], bins=bins)
+    sleeve_counts, _ = np.histogram(complete["10% TQQQ sleeve"], bins=bins)
+    centers = (bins[:-1] + bins[1:]) / 2.0
+    histogram_width = bin_width * 0.38
+
+    baseline_summary = summary.set_index("strategy").loc["Baseline"]
+    sleeve_summary = summary.set_index("strategy").loc["10% TQQQ sleeve"]
+    fig, ax = plt.subplots(figsize=(13, 7), dpi=170)
+    baseline_hist = ax.bar(
+        centers - histogram_width / 2.0,
+        baseline_counts,
+        width=histogram_width,
+        color=baseline_color,
+        edgecolor=ink,
+        linewidth=0.7,
+        label=(
+            f"Baseline — mean {baseline_summary['mean_annual_return']:.1%}, "
+            f"median {baseline_summary['median_annual_return']:.1%}"
+        ),
+    )
+    sleeve_hist = ax.bar(
+        centers + histogram_width / 2.0,
+        sleeve_counts,
+        width=histogram_width,
+        color=sleeve_color,
+        edgecolor=ink,
+        linewidth=0.7,
+        hatch="//",
+        label=(
+            f"10% sleeve — mean {sleeve_summary['mean_annual_return']:.1%}, "
+            f"median {sleeve_summary['median_annual_return']:.1%}"
+        ),
+    )
+    for bars in [baseline_hist, sleeve_hist]:
+        for bar in bars:
+            height = bar.get_height()
+            if height > 0:
+                ax.text(
+                    bar.get_x() + bar.get_width() / 2.0,
+                    height + 0.10,
+                    f"{int(height)}",
+                    ha="center",
+                    va="bottom",
+                    fontsize=9,
+                    color=ink,
+                )
+    ax.axvline(0.0, color=ink, linewidth=1.0)
+    ax.set_title(
+        "Distribution of complete calendar-year returns\n"
+        "Baseline versus 10% TQQQ sleeve; one-day additional delay; "
+        "1996–2025, n=30 years each; common 20pp bins",
+        loc="left",
+    )
+    ax.set_xlabel("Calendar-year return")
+    ax.set_ylabel("Number of years")
+    ax.xaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.set_xticks(centers)
+    ax.set_ylim(0.0, max(baseline_counts.max(), sleeve_counts.max()) + 1.5)
+    ax.legend(frameon=False, loc="upper right")
+    fig.tight_layout()
+    fig.savefig(
+        OUTPUT / "baseline_vs_partial10_delay1_annual_distribution.png",
+        bbox_inches="tight",
+    )
+    plt.close(fig)
+    return annual, summary
+
+
 def main() -> None:
     frame, _ = load_inputs()
     credit_spread = load_credit_spread(frame.index)
@@ -568,6 +763,7 @@ def main() -> None:
     )
 
     save_comparison_plots(selected, selected_paths)
+    save_annual_return_comparison(selected_paths)
 
     display_columns = [
         "method_label",

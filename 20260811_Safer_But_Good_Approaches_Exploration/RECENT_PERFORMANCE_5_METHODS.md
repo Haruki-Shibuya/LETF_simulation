@@ -56,6 +56,34 @@
 
 リスクオフ条件が3日連続するまで退出を待ちます。Dot-com期DDは-33.15%へ改善しましたが、直近252日と2026年YTDは元戦略より悪化しました。今回の課題に対する解決策ではありません。
 
+## 元戦略とTQQQ 10%残しの年次リターン比較
+
+次の図は、1取引日追加遅延ケースについて、元戦略と「リスクオフ時もTQQQを10%保有」の各暦年リターンを横並びにしたものです。2026年は4月17日までの部分年なので斜線で区別しています。
+
+![元戦略とTQQQ 10%残しの年次リターン](output/baseline_vs_partial10_delay1_annual_returns.png)
+
+完全な暦年である1996〜2025年の30年を同じ20パーセントポイント幅のビンに入れた分布は次のとおりです。2026年YTDは分布から除外しています。
+
+![元戦略とTQQQ 10%残しの年次リターン分布](output/baseline_vs_partial10_delay1_annual_distribution.png)
+
+| 指標（1996〜2025年） | 元戦略 | TQQQ 10%残し |
+|---|---:|---:|
+| 単純平均年次リターン | 52.77% | 54.66% |
+| 年次リターン中央値 | 37.83% | 39.58% |
+| 年次リターン標準偏差 | 60.46% | 66.89% |
+| プラス年 | 26年 | 24年 |
+| マイナス年 | 4年 | 6年 |
+| 最悪年 | 2022年、-28.02% | 2022年、-33.75% |
+| 最高年 | 1999年、220.85% | 1999年、250.18% |
+
+10%残しは平均と中央値をそれぞれ約1.9・1.8パーセントポイント引き上げましたが、標準偏差も約6.4ポイント上昇しました。元戦略では小幅プラスだった2001年と2002年がマイナスへ変わるため、マイナス年は4年から6年へ増えています。
+
+つまりこの変更は、**リスクを一様に下げるものではなく、リスクオフ期間にもNasdaq-100の値動きを少量残して上方・下方の両方の裾を広げるもの**です。2008年は元戦略+20.63%に対して10%残し+3.02%、2022年は-28.02%に対して-33.75%と悪化しました。一方、1999年、2003年、2009年、2020年、2023年など強い上昇年では改善しています。
+
+2026年YTDは元戦略-7.13%に対して10%残し-5.29%で、今回問題視した直近の取り逃しは1.84ポイント軽減しました。ただしプラスには戻っていません。
+
+年別の正確な数値は[`output/baseline_vs_partial10_delay1_annual_returns.csv`](output/baseline_vs_partial10_delay1_annual_returns.csv)、分布要約は[`output/baseline_vs_partial10_delay1_annual_summary.csv`](output/baseline_vs_partial10_delay1_annual_summary.csv)に保存しています。
+
 ## 直近パスと配分
 
 次の図は1取引日追加遅延ケースを、直近252取引日の開始値を100として比較したものです。
@@ -141,6 +169,8 @@ Nasdaq-100の公開NTM forward P/Eは現在値や2000年12月以降の月次チ�
 - 元戦略と5手法の選択結果: [`output/recent_improvement_selected_summary.csv`](output/recent_improvement_selected_summary.csv)
 - 選択6戦略の全日次パス: [`output/recent_improvement_selected_paths.csv`](output/recent_improvement_selected_paths.csv)
 - FRED BAA10Y原系列: [`output/data/fred_baa10y.csv`](output/data/fred_baa10y.csv)
+- 元戦略対10%残しの年次リターン: [`output/baseline_vs_partial10_delay1_annual_returns.csv`](output/baseline_vs_partial10_delay1_annual_returns.csv)
+- 年次分布の要約: [`output/baseline_vs_partial10_delay1_annual_summary.csv`](output/baseline_vs_partial10_delay1_annual_summary.csv)
 
 再実行例:
 

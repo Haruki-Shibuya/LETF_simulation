@@ -1,0 +1,3 @@
+strategy,complete_years,mean_annual_return,median_annual_return,annual_return_std,minimum_annual_return,minimum_year,maximum_annual_return,maximum_year,positive_years,negative_years
+Baseline,30,0.527672283572756,0.3782967771427521,0.6046347594197152,-0.28017416120155114,2022,2.2085418148101095,1999,26,4
+10% TQQQ sleeve,30,0.5465946663042889,0.39576493495093734,0.6689379641344602,-0.3375386588064493,2022,2.5017655040704794,1999,24,6
