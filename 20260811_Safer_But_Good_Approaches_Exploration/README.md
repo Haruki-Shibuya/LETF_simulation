@@ -14,6 +14,8 @@ The current in-sample winner under the requested 0/1-day execution-delay test is
 
 See the complete Japanese technical report, data inventory, methodology, charts, limitations, and reproduction steps in [STRATEGY_AND_SIMULATION.md](./STRATEGY_AND_SIMULATION.md).
 
+The follow-up comparison of five methods intended to improve the recent 2025–2026 result is in [RECENT_PERFORMANCE_5_METHODS.md](./RECENT_PERFORMANCE_5_METHODS.md). Its current implementation candidate is a 10% TQQQ sleeve during the original strategy's risk-off state; the more aggressive rebound and credit-overlay variants improve 2026 YTD but materially worsen other risks.
+
 ## Objective
 
 Identify a TQQQ-based strategy that can compound aggressively over a long historical simulation while remaining implementable, tax-aware, robust to execution delays, and capable of surviving the complete dot-com collapse.
