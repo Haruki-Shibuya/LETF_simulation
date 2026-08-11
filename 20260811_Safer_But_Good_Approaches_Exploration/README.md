@@ -16,6 +16,8 @@ See the complete Japanese technical report, data inventory, methodology, charts,
 
 The follow-up comparison of five methods intended to improve the recent 2025–2026 result is in [RECENT_PERFORMANCE_5_METHODS.md](./RECENT_PERFORMANCE_5_METHODS.md). Its current implementation candidate is a 10% TQQQ sleeve during the original strategy's risk-off state; the more aggressive rebound and credit-overlay variants improve 2026 YTD but materially worsen other risks.
 
+The TECL-versus-TQQQ follow-up tests five ways to use TECL only during selected parts of the original risk-on regime. See [TECL_TQQQ_ROTATION_5_METHODS.md](./TECL_TQQQ_ROTATION_5_METHODS.md). The current balanced research candidate confirms risk-on for five trading days, then holds TECL until its reference level gains 20%, and returns to TQQQ. It improves the post-2008 and actual-overlap CAGRs in-sample, but does not beat the original strategy's full-period CAGR and is not yet a production replacement.
+
 ## Objective
 
 Identify a TQQQ-based strategy that can compound aggressively over a long historical simulation while remaining implementable, tax-aware, robust to execution delays, and capable of surviving the complete dot-com collapse.

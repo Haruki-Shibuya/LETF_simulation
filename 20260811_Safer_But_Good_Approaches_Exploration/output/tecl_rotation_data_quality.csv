@@ -1,0 +1,2 @@
+series,rows,start,end,nulls,duplicate_dates,cross_source_overlap_rows,cross_source_max_abs_difference,actual_overlap_start,actual_overlap_end,model_actual_daily_corr,model_actual_mae_bps,legacy_proxy,modern_proxy,legacy_beta,financing_multiplier,annual_fee
+TECL stitched return,8475,1992-08-18,2026-04-17,0,0,5948,5.613531896199626e-06,2008-12-30,2026-04-24,0.9947311808886378,21.685703679297657,FSPTX,XLK,0.8416060984467163,3.142978183721425,0.0087
