@@ -11,6 +11,7 @@ import pandas as pd
 import yfinance as yf
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+from matplotlib.ticker import PercentFormatter
 
 
 ROOT = Path(__file__).resolve().parent
@@ -444,6 +445,139 @@ def save_recommended_plots(
     fig.savefig(OUTPUT / "recommended_regime_growth.png", bbox_inches="tight")
     plt.close(fig)
 
+
+def save_annual_return_plots(
+    paths: dict[int, pd.DataFrame],
+    grid: pd.DataFrame,
+    baseline_paths: dict[int, pd.DataFrame],
+    refinement_robust: pd.DataFrame,
+) -> pd.DataFrame:
+    """Save annual-return timeline and distribution for the 1-day-delay case."""
+    path = paths[1]
+    annual = (
+        (1.0 + path["net_return"])
+        .groupby(path.index.year)
+        .prod()
+        .sub(1.0)
+        .rename("annual_return")
+        .to_frame()
+    )
+    annual.index.name = "year"
+    final_year = int(path.index[-1].year)
+    annual["complete_year"] = annual.index < final_year
+    annual.to_csv(OUTPUT / "recommended_delay_1_annual_returns.csv")
+
+    positive = "#4C78A8"
+    negative = "#D98C4B"
+    ink = "#222222"
+    years = annual.index.to_numpy()
+    values = annual["annual_return"].to_numpy()
+    colors = [positive if value >= 0.0 else negative for value in values]
+
+    fig, ax = plt.subplots(figsize=(14, 7), dpi=160)
+    bars = ax.bar(years, values, color=colors, edgecolor="white", linewidth=0.6)
+    bars[-1].set_hatch("///")
+    bars[-1].set_edgecolor(ink)
+    for bar, value in zip(bars, values):
+        vertical_alignment = "bottom" if value >= 0.0 else "top"
+        offset = 0.025 if value >= 0.0 else -0.025
+        ax.text(
+            bar.get_x() + bar.get_width() / 2.0,
+            value + offset,
+            f"{value:.0%}",
+            ha="center",
+            va=vertical_alignment,
+            rotation=90,
+            fontsize=7,
+            color=ink,
+        )
+    ax.axhline(0.0, color=ink, linewidth=1.0)
+    ax.set_title(
+        "Annual returns — recommended 150/40/32%/3% strategy\n"
+        "1-day additional delay; 1996–2026, with 2026 through April 17",
+        loc="left",
+    )
+    ax.set_xlabel("Calendar year")
+    ax.set_ylabel("Annual return")
+    ax.yaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.set_xticks(years)
+    ax.set_xticklabels(
+        [f"{year} YTD" if year == final_year else str(year) for year in years],
+        rotation=45,
+        ha="right",
+    )
+    ax.legend(
+        handles=[
+            Patch(facecolor=positive, label="Positive year"),
+            Patch(facecolor=negative, label="Negative year"),
+            Patch(facecolor="white", edgecolor=ink, hatch="///", label="Partial year"),
+        ],
+        frameon=False,
+        ncol=3,
+        loc="upper left",
+    )
+    ax.margins(y=0.10)
+    fig.tight_layout()
+    fig.savefig(OUTPUT / "recommended_delay_1_annual_returns.png", bbox_inches="tight")
+    plt.close(fig)
+
+    complete = annual.loc[annual["complete_year"], "annual_return"]
+    bin_width = 0.20
+    lower = np.floor(complete.min() / bin_width) * bin_width
+    upper = np.ceil(complete.max() / bin_width) * bin_width + bin_width
+    bins = np.arange(lower, upper + 1e-12, bin_width)
+    mean_return = float(complete.mean())
+    median_return = float(complete.median())
+
+    fig, ax = plt.subplots(figsize=(12, 6.5), dpi=160)
+    counts, edges, patches = ax.hist(
+        complete,
+        bins=bins,
+        color=positive,
+        edgecolor="white",
+        linewidth=1.0,
+    )
+    for count, left, right in zip(counts, edges[:-1], edges[1:]):
+        if count:
+            ax.text(
+                (left + right) / 2.0,
+                count + 0.12,
+                f"{int(count)}",
+                ha="center",
+                va="bottom",
+                fontsize=9,
+                color=ink,
+            )
+    ax.axvline(
+        mean_return,
+        color=ink,
+        linewidth=1.8,
+        linestyle="--",
+        label=f"Mean {mean_return:.1%}",
+    )
+    ax.axvline(
+        median_return,
+        color=negative,
+        linewidth=1.8,
+        linestyle=":",
+        label=f"Median {median_return:.1%}",
+    )
+    ax.set_title(
+        "Distribution of calendar-year returns — recommended 150/40/32%/3% strategy\n"
+        f"1-day additional delay; 1996–2025 complete years, n={len(complete)}; 20pp bins",
+        loc="left",
+    )
+    ax.set_xlabel("Calendar-year return")
+    ax.set_ylabel("Number of years")
+    ax.xaxis.set_major_formatter(PercentFormatter(1.0))
+    ax.legend(frameon=False, loc="upper right")
+    ax.set_ylim(0.0, max(counts) + 1.4)
+    fig.tight_layout()
+    fig.savefig(
+        OUTPUT / "recommended_delay_1_annual_return_distribution.png",
+        bbox_inches="tight",
+    )
+    plt.close(fig)
     fig, ax = plt.subplots(figsize=(12, 6.5), dpi=160)
     for delay, path in paths.items():
         ax.plot(
@@ -526,6 +660,7 @@ def save_recommended_plots(
     fig.tight_layout()
     fig.savefig(OUTPUT / "refinement_robust_surface.png", bbox_inches="tight")
     plt.close(fig)
+    return annual
 
 
 def write_report(
@@ -732,6 +867,9 @@ def write_report(
             "- `output/refinement_robust_surface.png`",
             "- `output/recommended_regime_growth.png`",
             "- `output/recommended_delay_equity_curves.png`",
+            "- `output/recommended_delay_1_annual_returns.csv`",
+            "- `output/recommended_delay_1_annual_returns.png`",
+            "- `output/recommended_delay_1_annual_return_distribution.png`",
         ]
     )
     (ROOT / "VALIDATION_REPORT.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -824,6 +962,9 @@ def main() -> None:
 
     save_plots(grid, baseline_paths, benchmark, refinement_robust)
     save_recommended_plots(
+        recommended_paths, grid, baseline_paths, refinement_robust
+    )
+    save_annual_return_plots(
         recommended_paths, grid, baseline_paths, refinement_robust
     )
     write_report(grid, quality, benchmark, refinement_grid, refinement_robust)

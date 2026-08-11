@@ -29,6 +29,18 @@
 
 ![150/40/32/3 normal execution versus one-day delay](output/recommended_delay_equity_curves.png)
 
+## 年次リターンは大きく変動する
+
+次の棒グラフは1日追加遅延ケースの各暦年リターンです。青がプラス、橙がマイナスです。2026年は4月17日までの部分年なので斜線で区別しています。長期CAGRは高い一方、単年成績の振れ幅も非常に大きいことが分かります。
+
+![Annual returns for the recommended one-day-delay strategy](output/recommended_delay_1_annual_returns.png)
+
+分布グラフには完全な暦年である1996〜2025年の30年だけを使用し、2026年YTDを除外しています。20パーセントポイント幅のヒストグラムに平均値と中央値を重ねています。平均は一部の極端な上昇年に引き上げられるため、典型的な年の理解には中央値も併せて確認する必要があります。
+
+![Distribution of annual returns for the recommended one-day-delay strategy](output/recommended_delay_1_annual_return_distribution.png)
+
+年別の正確な値は[`output/recommended_delay_1_annual_returns.csv`](output/recommended_delay_1_annual_returns.csv)に保存しています。
+
 ## 戦略ルール
 
 ### 1. SPYによるトレンド状態

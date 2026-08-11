@@ -95,3 +95,6 @@ KMLMSIMを取り込んだ全域検証でも、単一の最高値ではなく連�
 - `output/refinement_robust_surface.png`
 - `output/recommended_regime_growth.png`
 - `output/recommended_delay_equity_curves.png`
+- `output/recommended_delay_1_annual_returns.csv`
+- `output/recommended_delay_1_annual_returns.png`
+- `output/recommended_delay_1_annual_return_distribution.png`
