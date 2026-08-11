@@ -44,6 +44,24 @@
 
 年別の正確な値は[`output/recommended_delay_1_annual_returns.csv`](output/recommended_delay_1_annual_returns.csv)に保存しています。
 
+## 開始年別CAGR・ボラティリティ比較
+
+次の図は、開始年を `x` として、各年の最初の利用可能取引日から2026年4月17日までのpre-tax CAGRと年率ボラティリティを比較したものです。比較対象はTQQQ合成・実績接続系列の買い持ち、戦略の通常執行、戦略の1取引日追加遅延です。戦略状態は1996年開始の既存パスから引き継ぎ、各開始年で初期化していません。
+
+![CAGR and annualized volatility by starting year](output/start_year_cagr_volatility_comparison.png)
+
+主な結果は次のとおりです。
+
+- 1996〜2020年を開始年とした全ケースで、1日追加遅延戦略のCAGRは30%超
+- 1日追加遅延戦略が30%を下回る開始年は2021・2022・2024・2025・2026年
+- 利用可能な1996〜2026年の全31開始年で、戦略の年率ボラティリティはTQQQ買い持ちより低い
+- 2008年開始では、TQQQ買い持ちのCAGR 26.93%・ボラ67.46%に対し、1日追加遅延戦略はCAGR 40.88%・ボラ43.43%
+- 2026年は73取引日しかなく、CAGRとボラを年率換算した短期値なので長期結果と同列に解釈できない
+
+1995年は現在の検証済み戦略パスが1996年1月2日開始のためN/Aです。開始年ごとの窓はすべて同じ終了日を共有する入れ子の期間であり、独立した31個のアウト・オブ・サンプル試験ではありません。
+
+全数値は[`output/start_year_cagr_volatility_comparison.csv`](output/start_year_cagr_volatility_comparison.csv)、再生成コードは[`analyze_start_year_metrics.py`](analyze_start_year_metrics.py)に保存しています。
+
 ## 戦略ルール
 
 ### 1. SPYによるトレンド状態
