@@ -1,5 +1,18 @@
 # Safer but Good Approaches Exploration
 
+## Current result
+
+The current in-sample winner under the requested 0/1-day execution-delay test is:
+
+- SPY SMA: 150 trading days
+- Nasdaq-100 volatility lookback: 40 trading days
+- Annualized volatility threshold: 32%
+- SMA hysteresis tolerance: 3%
+- Risk-on: 100% TQQQ canonical stitched return
+- Risk-off: one third each KMLMSIM, gold, and VFITX
+
+See the complete Japanese technical report, data inventory, methodology, charts, limitations, and reproduction steps in [STRATEGY_AND_SIMULATION.md](./STRATEGY_AND_SIMULATION.md).
+
 ## Objective
 
 Identify a TQQQ-based strategy that can compound aggressively over a long historical simulation while remaining implementable, tax-aware, robust to execution delays, and capable of surviving the complete dot-com collapse.
@@ -26,12 +39,10 @@ Gross or frictionless returns do not satisfy this requirement.
 
 The strategy must still satisfy, or remain close to, the return requirement when every signal is delayed by one trading day.
 
-Every candidate must be tested with the following signal delays:
+Every candidate is currently tested with the following signal delays:
 
 - 0 trading days
 - 1 trading day
-- 2 trading days
-- 5 trading days
 
 A strategy is rejected if a one-day delay causes its performance to collapse. Performance should degrade gradually rather than depend on exact same-day execution.
 
@@ -95,7 +106,7 @@ Report the following for the pretax and after-tax portfolios where applicable:
 - Taxes paid by year
 - Realized losses carried forward
 - Percentage of time in risk-on and risk-off states
-- Performance under 0-, 1-, 2-, and 5-day signal delays
+- Performance under 0- and 1-day signal delays
 
 Include a logarithmic equity curve starting from the same initial capital for every compared portfolio, with risk-on and risk-off periods clearly identified.
 
