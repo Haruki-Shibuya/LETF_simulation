@@ -18,6 +18,8 @@ The initial comparison of five methods intended to improve the recent 2025–202
 
 The replacement study in [REENTRY_2026_5_METHODS.md](./REENTRY_2026_5_METHODS.md) makes positive 2026 YTD a hard requirement and tests five dynamic re-entry families. The current research candidate re-enters TQQQ when the Nasdaq-100 remains above its 3-day SMA for five trading days, provided SPY is no more than 8% below SMA150 and 40-day Nasdaq volatility remains below 32%. The worse result across normal and one-day-additional delays is 6.58% for 2026 YTD, 40.41% full-period CAGR, and -58.91% maximum drawdown. This is still an in-sample research candidate pending tax-aware and walk-forward validation.
 
+The adoption decision and downside-volatility replacement test are in [DOWNSIDE_VOLATILITY_DECISION.md](./DOWNSIDE_VOLATILITY_DECISION.md). Across 273 downside-deviation parameter combinations, the strongest downside-only candidate retained the same 6.58% worst-delay 2026 YTD result but reduced the worst-delay full-period CAGR from 40.41% to 35.99% and increased the delay CAGR gap from 0.34 to 2.26 percentage points. The total-volatility version therefore remains the provisional research choice.
+
 The TECL-versus-TQQQ follow-up tests five ways to use TECL only during selected parts of the original risk-on regime. See [TECL_TQQQ_ROTATION_5_METHODS.md](./TECL_TQQQ_ROTATION_5_METHODS.md). The current balanced research candidate confirms risk-on for five trading days, then holds TECL until its reference level gains 20%, and returns to TQQQ. It improves the post-2008 and actual-overlap CAGRs in-sample, but does not beat the original strategy's full-period CAGR and is not yet a production replacement.
 
 ## Objective
