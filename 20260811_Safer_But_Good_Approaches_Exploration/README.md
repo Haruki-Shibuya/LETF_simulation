@@ -14,7 +14,9 @@ The current in-sample winner under the requested 0/1-day execution-delay test is
 
 See the complete Japanese technical report, data inventory, methodology, charts, limitations, and reproduction steps in [STRATEGY_AND_SIMULATION.md](./STRATEGY_AND_SIMULATION.md).
 
-The follow-up comparison of five methods intended to improve the recent 2025–2026 result is in [RECENT_PERFORMANCE_5_METHODS.md](./RECENT_PERFORMANCE_5_METHODS.md). Its current implementation candidate is a 10% TQQQ sleeve during the original strategy's risk-off state; the more aggressive rebound and credit-overlay variants improve 2026 YTD but materially worsen other risks.
+The initial comparison of five methods intended to improve the recent 2025–2026 result is in [RECENT_PERFORMANCE_5_METHODS.md](./RECENT_PERFORMANCE_5_METHODS.md). Its former 10% TQQQ risk-off sleeve improved 2026 YTD only from roughly -7% to -5%, so it is no longer recommended as a solution to the stated problem.
+
+The replacement study in [REENTRY_2026_5_METHODS.md](./REENTRY_2026_5_METHODS.md) makes positive 2026 YTD a hard requirement and tests five dynamic re-entry families. The current research candidate re-enters TQQQ when the Nasdaq-100 remains above its 3-day SMA for five trading days, provided SPY is no more than 8% below SMA150 and 40-day Nasdaq volatility remains below 32%. The worse result across normal and one-day-additional delays is 6.58% for 2026 YTD, 40.41% full-period CAGR, and -58.91% maximum drawdown. This is still an in-sample research candidate pending tax-aware and walk-forward validation.
 
 The TECL-versus-TQQQ follow-up tests five ways to use TECL only during selected parts of the original risk-on regime. See [TECL_TQQQ_ROTATION_5_METHODS.md](./TECL_TQQQ_ROTATION_5_METHODS.md). The current balanced research candidate confirms risk-on for five trading days, then holds TECL until its reference level gains 20%, and returns to TQQQ. It improves the post-2008 and actual-overlap CAGRs in-sample, but does not beat the original strategy's full-period CAGR and is not yet a production replacement.
 
